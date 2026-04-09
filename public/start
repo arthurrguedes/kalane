@@ -1,0 +1,4 @@
+$env:Path="C:\node;" + $env:Path
+npm.cmd install
+npm.cmd install lucide-react
+npm.cmd run dev
