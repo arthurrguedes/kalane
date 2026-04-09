@@ -1,0 +1,13 @@
+/* Container principal que envolve todo o site */
+.appContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Área central onde as páginas vão aparecer */
+.mainContent {
+  flex: 1; /* Faz esta área expandir e empurrar o Footer para o final da página */
+  display: flex;
+  flex-direction: column;
+}

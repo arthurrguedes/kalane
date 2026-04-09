@@ -1,0 +1,281 @@
+.homeContainer {
+  font-family: sans-serif;
+  color: #1f2937;
+}
+
+/* BOTÕES GERAIS */
+.btnSolid {
+  background-color: #38B2A6;
+  color: white;
+  padding: 0.5rem 2rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease-in-out;
+}
+
+.btnSolid:hover {
+  background-color: #1b5e57;
+  border-color: #2c8c82;
+  box-shadow: 0 4px 12px rgba(56, 178, 166, 0.4); /* Adiciona um "brilho/sombra" verde ao redor */
+  transform: translateY(-2px);
+  transition: all 0.3s ease-in-out;
+}
+
+.btnOutline {
+  background-color: white;
+  color: #38B2A6;
+  padding: 0.5rem 2rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease-in-out;
+}
+
+.btnOutline:hover {
+  background-color: #1b5e57;
+  color: white;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1); /* Aumenta a sombra, como se estivesse flutuando mais alto */
+  transform: translateY(-2px);
+  transition: all 0.3s ease-in-out;
+}
+
+.placeholderText {
+  font-size: 2.25rem;
+  color: #9ca3af;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+}
+
+/* HERO SECTION */
+.hero {
+  background-color: #D9D9D9;
+  height: 400px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.heroButtonWrapper {
+  position: absolute;
+  bottom: 2rem;
+  right: 4rem;
+}
+
+/* COLLECTION SECTION */
+.collection {
+  background-color: #6CDCD4;
+  background-image: linear-gradient(180deg, #5cc6bf 0%, #61d3cb 45%, #91F2E9 100%);
+  font-family: 'Cormorant', serif;
+  padding: 3rem 1.5rem; /* Padding menor no celular */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  text-align: center; /* Garante que o texto fique centralizado */
+}
+
+.collectionTitle {
+  font-size: 2rem; /* Título menor pro celular */
+  font-family: 'Cormorant', serif;
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+}
+
+.collectionSubtitle {
+  font-size: 1.2rem;
+  font-weight: 300;
+  margin-bottom: 2rem;
+}
+
+.cardsContainer {
+  display: flex;
+  flex-direction: column; /* Empilhado no celular */
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  width: 100%;
+  max-width: 56rem;
+}
+
+.card {
+  position: relative;
+  width: 100%; /* Ocupa a largura disponível da tela do celular mas não passa de 16rem para não ficar gigante */
+  max-width: 16rem;    
+  height: 20rem;
+  background-color: #D9D9D9;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardIcon {
+  color: #9ca3af;
+  font-size: 1.5rem;
+  font-weight: 300;
+}
+
+.cardLinkBtn {
+  position: absolute;
+  top: -1rem;
+  right: -1rem;
+  background-color: white;
+  color: black;
+  padding: 0.75rem;
+  border-radius: 50%;
+  border: none;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* CAROUSEL BANNER */
+.carousel {
+  background-color: #E5E5E5;
+  height: 350px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carouselBtn {
+  position: absolute;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.carouselBtn.prev {
+  left: 2rem;
+}
+
+.carouselBtn.next {
+  right: 2rem;
+}
+
+/* TESTIMONIALS - Layout Mobile (Padrão)   */
+.testimonials {
+  background-color: #FAFAFA;
+  padding: 3rem 1.5rem; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.testimonialsTitle {
+  font-size: 1.5rem;
+  font-family: serif;
+  margin-bottom: 2rem;
+  color: black;
+}
+
+.testimonialsContainer {
+  display: flex;
+  flex-direction: column; 
+  gap: 1.5rem;
+  justify-content: center;
+  width: 100%;
+  max-width: 64rem;
+}
+
+.testimonialCard {
+  background-color: white;
+  padding: 1.5rem; 
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  border: 1px solid #f3f4f6;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.testimonialHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.avatar {
+  width: 3rem;
+  height: 3rem;
+  background-color: #D9D9D9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem;
+  color: #6b7280;
+}
+
+.stars {
+  display: flex;
+  color: #facc15;
+}
+
+.testimonialText {
+  color: #4b5563;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.testimonialAuthor {
+  width: 100%;
+  text-align: left;
+  font-weight: bold;
+  color: black;
+  margin-top: auto;
+}
+
+/* LAYOUT DESKTOP (Telas maiores que 768px)*/
+@media (min-width: 768px) {
+  /* Restaurando os valores originais para o desktop */
+    .cardsContainer {
+    flex-direction: row; 
+    justify-content: center;
+    gap: 2rem;
+  }
+
+  .testimonials {
+    padding: 4rem 2rem;
+  }
+
+  .testimonialsTitle {
+    font-size: 1.875rem;
+    margin-bottom: 3rem;
+  }
+
+  .testimonialsContainer {
+    /* No desktop os cards voltam a ficar em row */
+    flex-direction: row; 
+    align-items: stretch; /* Garante que todos os cards tenham a mesma altura */
+  }
+
+  .testimonialCard {
+    padding: 2rem;
+    flex: 1; /* Cards crescem e diminuem igualmente para preencher a largura */
+    width: auto; /* determinado pelo flex */
+  }
+}
