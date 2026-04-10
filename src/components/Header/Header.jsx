@@ -40,7 +40,7 @@ const Header = () => {
         <div className={styles.searchBox}>
           <input 
             type="text" 
-            placeholder="Buscar..." 
+            placeholder="Buscar por produtos..." 
             className={styles.searchInput}
           />
           <Search size={16} className={styles.searchIcon} />

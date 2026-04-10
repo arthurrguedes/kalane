@@ -6,7 +6,9 @@
   padding: 1rem 1.5rem;
   background-color: white;
   border-bottom: 1px solid #f3f4f6;
-  position: relative; /* Necessário para o dropdown do mobile ficar posicionado corretamente */
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 /* LOGO */
