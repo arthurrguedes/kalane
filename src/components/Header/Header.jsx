@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import styles from './Header.module.css';
-import { Search, ShoppingCart, Flower2, Menu, X } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, X } from 'lucide-react';
 import logoMarca from '../../assets/kalane-logo.png';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
-  // Controle de menu mobile se está aberto (true) ou fechado (false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
-  // Função para alternar o estado do menu
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const toggleProfileDropdown = () => {
+    setIsProfileDropdownOpen(!isProfileDropdownOpen);
   };
 
   return (
@@ -47,19 +51,30 @@ const Header = () => {
         </div>
         
         <div className={styles.divider}></div>
-        <ShoppingCart size={24} className={styles.cartIcon} />
+        
+        {/* ÍCONE PERFIL COM DROPDOWN */}
+        <div className={styles.profileWrapper}>
+          <User size={24} className={styles.actionIcon} onClick={toggleProfileDropdown} />
+          
+          {isProfileDropdownOpen && (
+            <div className={styles.profileDropdown}>
+              <a href="/login">Login</a>
+              <a href="/cadastro">Cadastre-se</a>
+            </div>
+          )}
+        </div>
+
+        <ShoppingCart size={24} className={styles.actionIcon} />
 
         {/* MENU HAMBÚRGUER (celular ONLY) */}
         <button className={styles.hamburgerBtn} onClick={toggleMobileMenu}>
-          {/* Se o menu estiver aberto, mostra o X. Se fechado, mostra o menu sanduíche */}
           {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
 
-      {/* MENU MOBILE (Aparece condicionalmente) */}
+      {/* MENU MOBILE */}
       {isMobileMenuOpen && (
         <nav className={styles.mobileNav}>
-          {/* Inclui o onClick para fechar o menu automaticamente ao clicar no link */}
           <a href="/" onClick={toggleMobileMenu}>Início</a>
           <a href="/marca" onClick={toggleMobileMenu}>A Marca</a>
           <a href="/produtos" onClick={toggleMobileMenu}>Produtos</a>

@@ -46,9 +46,56 @@
   display: none; /* Esconde o divisor vertical no celular */
 }
 
-.cartIcon {
+/* Ícones de ação (Perfil e Carrinho) */
+.actionIcon {
   color: #38B2A6;
   cursor: pointer;
+  transition: color 0.2s;
+}
+
+.actionIcon:hover {
+  color: #1b5e57;
+}
+
+/* Wrapper e Dropdown do Perfil */
+.profileWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.profileDropdown {
+  position: absolute;
+  top: calc(100% + 15px);
+  right: -10px;
+  background-color: white;
+  border: 1px solid #f3f4f6;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  width: 140px;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.profileDropdown a {
+  padding: 0.75rem 1rem;
+  color: #1f2937;
+  text-decoration: none;
+  font-family: sans-serif;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #f9fafb;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.profileDropdown a:last-child {
+  border-bottom: none;
+}
+
+.profileDropdown a:hover {
+  background-color: #f3f4f6;
+  color: #38B2A6;
 }
 
 /* O botão hamburguer é exibido */

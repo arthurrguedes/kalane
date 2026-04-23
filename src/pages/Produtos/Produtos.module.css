@@ -1,0 +1,208 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  padding: 2rem;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0;
+  align-items: flex-start; 
+}
+
+.sidebar {
+  width: 240px;
+  min-width: 200px;
+  background-color: #ffffff;
+  padding: 0.5rem;
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+  border: 1px solid #f9fafb;
+  position: sticky;
+  top: 100px;
+  z-index: 10;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 0px;
+}
+
+.sidebarTitle {
+  font-family: 'DM Serif Display', serif;
+  color: #1f2937;
+  font-weight: 400;
+  font-size: 1.25rem;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.filterGroup {
+  margin-bottom: 1.5rem;
+}
+
+.filterGroup h3 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #9ca3af;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #4b5563;
+  transition: color 0.2s;
+}
+
+.checkboxLabel:hover {
+  color: #38B2A6;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.checkboxLabel input[type="checkbox"]:checked {
+  background-color: #38B2A6;
+  border-color: #38B2A6;
+}
+
+/* O checkzinho dentro do box */
+.checkboxLabel input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.rangeSlider {
+  width: 100%;
+  accent-color: #38B2A6;
+  margin-top: 0.5rem;
+  cursor: pointer;
+}
+
+.productGrid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 produtos dividindo a linha */
+  gap: 1.5rem;
+}
+
+.productCard {
+  background: white;
+  border-radius: 1.5rem;
+  border: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.productCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(56, 178, 166, 0.12);
+}
+
+.placeholderImage {
+  background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%); 
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+}
+
+.productInfo {
+  padding: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.productInfo h4 {
+  font-family: 'DM Serif Display', serif;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.productInfo p {
+  color: #38B2A6;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+/* --- RESPONSIVIDADE MOBILE --- */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    gap: 1rem;
+    /* Mantém o flex-row para a sidebar continuar à esquerda */
+  }
+
+  .sidebar {
+    width: 120px; /* Estreita a sidebar para caber a grade ao lado */
+    min-width: 120px;
+    padding: 1rem 0.5rem;
+  }
+
+  .sidebarTitle {
+    font-size: 1.2rem;
+  }
+
+  .filterGroup h3 {
+    font-size: 0.9rem;
+  }
+
+  .checkboxLabel {
+    font-size: 0.85rem;
+  }
+
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr); /* 2 produtos por linha */
+    gap: 0.75rem;
+  }
+
+  .placeholderImage {
+    height: 150px; /* Ajuste proporcional da imagem */
+  }
+
+  .productInfo {
+    padding: 0.75rem;
+  }
+
+  .productInfo h4 {
+    font-size: 0.95rem;
+  }
+
+  .productInfo p {
+    font-size: 1rem;
+  }
+}
