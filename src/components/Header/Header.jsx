@@ -31,12 +31,12 @@ const Header = () => {
 
       {/* MENU DESKTOP */}
       <nav className={styles.desktopNav}>
-        <a href="/">Início</a>
-        <a href="/marca">A Marca</a>
-        <a href="/produtos">Produtos</a>
-        <a href="/kits">Kits</a>
-        <a href="/mais-vendidos">Mais Vendidos</a>
-        <a href="/contato">Contato</a>
+        <Link to="/">Início</Link>
+        <Link to="/marca">A Marca</Link>
+        <Link to="/produtos">Produtos</Link>
+        <Link to="/kits">Kits</Link>
+        <Link to="/mais-vendidos">Mais Vendidos</Link>
+        <Link to="/contato">Contato</Link>
       </nav>
 
       {/* ÍCONES E BUSCA */}

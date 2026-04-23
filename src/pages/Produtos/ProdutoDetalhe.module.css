@@ -1,0 +1,226 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: sans-serif;
+  color: #1f2937;
+}
+
+.breadcrumb {
+  font-size: 0.9rem;
+  color: #38B2A6;
+  margin-bottom: 2rem;
+  font-weight: 600;
+}
+
+.breadcrumb a {
+  color: #38B2A6;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.productLayout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+.imageSection {
+  width: 100%;
+}
+
+.imageZoomContainer {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background-color: #D9D9D9;
+  border-radius: 0.5rem;
+  background-repeat: no-repeat;
+  cursor: crosshair;
+  transition: background-size 0.3s ease-out;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.detailsSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.5rem;
+  font-weight: 400;
+  margin-bottom: 1rem;
+  color: #000;
+  line-height: 1.1;
+}
+
+.actionIcons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.actionIcons button {
+  background: none;
+  border: none;
+  color: #38B2A6;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.actionIcons button:hover {
+  transform: scale(1.1);
+}
+
+.price {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #000;
+}
+
+.description {
+  font-size: 0.85rem;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 3rem;
+  max-width: 90%;
+}
+
+.quantityWrapper {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+  margin-bottom: 3rem;
+}
+
+.quantityLabel {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.2rem;
+  color: #4b5563;
+}
+
+.quantityControl {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #4b5563;
+}
+
+.quantityControl button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+}
+
+.purchaseSection {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+}
+
+.totalInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.totalPrice {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.5rem;
+  color: #4b5563;
+  margin-bottom: 0.25rem;
+}
+
+.totalPrice span {
+  color: #38B2A6;
+}
+
+.installments {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.buyButton {
+  background-color: #91F2E9; /* Tom verde água mais claro idêntico à imagem */
+  color: #0a6b61; /* Tom mais escuro para contraste */
+  padding: 1.25rem 2.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.25rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.buyButton:hover {
+    background-color: #1b5e57;
+  color: white;
+}
+
+/* RESPONSIVIDADE MOBILE */
+@media (max-width: 768px) {
+  .productLayout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .title {
+    font-size: 2.5rem;
+  }
+  
+  .price {
+    font-size: 2.5rem;
+  }
+
+  .quantityWrapper {
+    gap: 2rem;
+  }
+
+  .purchaseSection {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .buyButton {
+    width: 100%;
+  }
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.animatedIcon {
+  transition: fill 0.4s ease, transform 0.2s ease;
+}
+
+.iconBtn:active .animatedIcon {
+  transform: scale(0.9);
+}
+
+.animatedIcon[fill="#38B2A6"] {
+  filter: drop-shadow(0 0 2px rgba(56, 178, 166, 0.2));
+}

@@ -1,29 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { mockProducts } from '../../data/produtos';
 import styles from './Produtos.module.css';
 
-const categoriasDisponiveis = ['Bodysplash', 'Sabonete', 'Loção'];
+const tiposDisponiveis = ['Bodysplash', 'Sabonete', 'Loção'];
 const aromasDisponiveis = ['Doce', 'Cítrico', 'Floral', 'Frutado', 'Amadeirado'];
-
-// Adicionamos 'category' e 'aroma' para cada produto
-const mockProducts = [
-  { id: 1, name: 'Bodysplash Vanilla Sky', price: 89.90, category: 'Bodysplash', aroma: 'Doce' },
-  { id: 2, name: 'Sabonete Citrus Fresh', price: 25.00, category: 'Sabonete', aroma: 'Cítrico' },
-  { id: 3, name: 'Bodysplash Floral Bloom', price: 92.50, category: 'Bodysplash', aroma: 'Floral' },
-  { id: 4, name: 'Loção Berry Punch', price: 68.00, category: 'Loção', aroma: 'Frutado' },
-  { id: 5, name: 'Bodysplash Amber Wood', price: 110.00, category: 'Bodysplash', aroma: 'Amadeirado' },
-  { id: 6, name: 'Sabonete Sweet Candy', price: 22.00, category: 'Sabonete', aroma: 'Doce' },
-];
 
 const Produtos = () => {
   const [maxPrice, setMaxPrice] = useState(150);
-  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState([]);
+  const [tiposSelecionados, setTiposSelecionadas] = useState([]);
   const [aromasSelecionados, setAromasSelecionados] = useState([]);
   const navigate = useNavigate();
 
-  const handleCategoriaChange = (categoria) => {
-    setCategoriasSelecionadas((prev) => 
-      prev.includes(categoria) ? prev.filter((c) => c !== categoria) : [...prev, categoria]
+  const handleTipoChange = (tipo) => {
+    setTiposSelecionadas((prev) => 
+      prev.includes(tipo) ? prev.filter((t) => t !== tipo) : [...prev, tipo]
     );
   };
 
@@ -33,15 +24,13 @@ const Produtos = () => {
     );
   };
 
-  // Filtragem cruzando Preço, Categoria e Aroma
+  // Lógica de filtragem cruzada
   const filteredProducts = mockProducts.filter((product) => {
     const atendePreco = product.price <= maxPrice;
-    
-    const atendeCategoria = categoriasSelecionadas.length === 0 || categoriasSelecionadas.includes(product.category);
-    
+    const atendeTipo = tiposSelecionados.length === 0 || tiposSelecionados.includes(product.category);
     const atendeAroma = aromasSelecionados.length === 0 || aromasSelecionados.includes(product.aroma);
 
-    return atendePreco && atendeCategoria && atendeAroma;
+    return atendePreco && atendeTipo && atendeAroma;
   });
 
   return (
@@ -49,20 +38,22 @@ const Produtos = () => {
       <aside className={styles.sidebar}>
         <h2 className={styles.sidebarTitle}>Filtros</h2>
         
+        {/* FILTRO DE TIPOS (CATEGORIAS) */}
         <div className={styles.filterGroup}>
           <h3>Categorias</h3>
-          {categoriasDisponiveis.map(cat => (
-            <label key={cat} className={styles.checkboxLabel}>
+          {tiposDisponiveis.map(tipo => (
+            <label key={tipo} className={styles.checkboxLabel}>
               <input 
                 type="checkbox" 
-                checked={categoriasSelecionadas.includes(cat)}
-                onChange={() => handleCategoriaChange(cat)}
+                checked={tiposSelecionados.includes(tipo)}
+                onChange={() => handleTipoChange(tipo)}
               /> 
-              {cat}
+              {tipo}
             </label>
           ))}
         </div>
 
+        {/* FILTRO DE AROMAS */}
         <div className={styles.filterGroup}>
           <h3>Aromas</h3>
           {aromasDisponiveis.map(aroma => (
@@ -77,6 +68,7 @@ const Produtos = () => {
           ))}
         </div>
 
+        {/* FILTRO DE PREÇO */}
         <div className={styles.filterGroup}>
           <h3>Preço máximo: R$ {maxPrice}</h3>
           <input 
@@ -98,7 +90,7 @@ const Produtos = () => {
               className={styles.productCard}
               onClick={() => navigate(`/produto/${product.id}`)}
             >
-              <div className={styles.placeholderImage}>Imagem</div>
+              <div className={styles.placeholderImage}>imagem</div>
               <div className={styles.productInfo}>
                 <h4>{product.name}</h4>
                 <p>R$ {product.price.toFixed(2).replace('.', ',')}</p>
@@ -106,7 +98,7 @@ const Produtos = () => {
             </div>
           ))
         ) : (
-          <p style={{ gridColumn: '1 / -1', textAlign: 'center', color: '#6b7280' }}>
+          <p className={styles.emptyMessage}>
             Nenhum produto encontrado com estes filtros.
           </p>
         )}
