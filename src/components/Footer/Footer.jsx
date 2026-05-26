@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './Footer.module.css';
-import { FaInstagram, FaFacebookF, FaTiktok, FaPinterestP } from 'react-icons/fa';
-import { Mail, Phone, MapPin, ShieldCheck, CreditCard } from 'lucide-react';
+import { FaInstagram, FaFacebookF, FaTiktok, FaPinterestP, FaWhatsapp } from 'react-icons/fa';
+import { Mail, MapPin, ShieldCheck, CreditCard } from 'lucide-react';
 import logoMarca from '../../assets/logo-rodape.png';
 
 const Footer = () => {
@@ -32,22 +32,11 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className={styles.column}>
-          <h3 className={styles.title}>Links Úteis</h3>
-          <ul className={styles.links}>
-            <li><a href="/marca">A Marca</a></li>
-            <li><a href="/produtos">Produtos</a></li>
-            <li><a href="/kits">Kits</a></li>
-            <li><a href="/politica-de-privacidade">Política de Privacidade</a></li>
-            <li><a href="/termos">Termos de Uso</a></li>
-          </ul>
-        </div>
-
-        <div className={styles.column}>
+                <div className={styles.column}>
           <h3 className={styles.title}>Atendimento</h3>
           <ul className={styles.contactList}>
             <li>
-              <Phone size={16} className={styles.icon} />
+              <FaWhatsapp size={16} className={styles.icon} />
               <span>(11) 99999-9999</span>
             </li>
             <li>
@@ -60,6 +49,17 @@ const Footer = () => {
             </li>
           </ul>
           <p className={styles.workingHours}>Segunda a Domingo: 9h às 18h</p>
+        </div>
+
+        <div className={styles.column}>
+          <h3 className={styles.title}>Links Úteis</h3>
+          <ul className={styles.links}>
+            <li><a href="/marca">A Marca</a></li>
+            <li><a href="/produtos">Produtos</a></li>
+            <li><a href="/kits">Kits</a></li>
+            <li><a href="/politica-de-privacidade">Política de Privacidade</a></li>
+            <li><a href="/termos">Termos de Uso</a></li>
+          </ul>
         </div>
 
         <div className={styles.column}>
