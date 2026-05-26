@@ -6,6 +6,8 @@ import Footer from './components/Footer/Footer';
 import Home from './pages/Home/Home';
 import Produtos from './pages/Produtos/Produtos';
 import ProdutoDetalhe from './pages/Produtos/ProdutoDetalhe';
+import Marca from './pages/Marca/Marca';
+import WhatsAppButton from './components/WhatsAppButton/WhatsAppButton';
 import './index.css';
 
 const App = () => {
@@ -19,10 +21,12 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/produtos" element={<Produtos />} />
             <Route path="/produto/:id" element={<ProdutoDetalhe />} />
+            <Route path="/marca" element={<Marca />} />
           </Routes>
         </main>
 
         <Footer />
+        <WhatsAppButton />
       </div>
     </BrowserRouter>
   );

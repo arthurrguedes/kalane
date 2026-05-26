@@ -1,6 +1,239 @@
-/* FOOTER */
 .footer {
-  background-color: #38B2A6;
-  height: 3rem;
+  background-color: #2b8f85; /* Turquesa principal da marca */
+  border-top: none; 
   width: 100%;
+  padding: 4rem 0 0 0;
+  color: #ffffff; /* Texto passa a branco para contrastar */
+  font-family: sans-serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2.5rem;
+  padding-bottom: 3rem;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  height: 55px;
+  width: auto;
+  align-self: flex-start;
+  margin-bottom: 1.25rem;
+  /* Nota: Se o logo atual for escuro, pode aplicar um filtro de brilho ou usar uma versão branca em PNG */
+}
+
+.aboutText {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #e5e7eb; /* Branco mais suave para não cansar a vista */
+  margin-bottom: 1.5rem;
+}
+
+.socialText {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #e5e7eb; /* Branco mais suave para não cansar a vista */
+  margin-bottom: 1.5rem;
+}
+
+.socials {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Define a cor dos ícones como branco */
+.socials a {
+  color: #ffffff; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Efeito ao passar o rato (hover) */
+.socials a:hover {
+  opacity: 0.8; /* Fica ligeiramente transparente */
+  transform: translateY(-2px); /* Dá um pequeno salto para cima */
+}
+
+.title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.2rem;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.titlePayment {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.2rem;
+  color: #ffffff;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.links a {
+  color: #e5e7eb;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.links a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.contactList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.contactList li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #e5e7eb;
+}
+
+.icon {
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.workingHours {
+  font-size: 0.8rem;
+  color: #d1d5db;
+  margin-top: 1rem;
+}
+
+.badgeWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.securityBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.1); /* Fundo translúcido branco */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+  width: fit-content;
+}
+
+.securityIcon {
+  color: #ffffff;
+}
+
+.badgeTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.badgeDesc {
+  font-size: 0.75rem;
+  color: #e5e7eb;
+  margin: 0;
+}
+
+.paymentIcons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.paymentMethod, .pixBadge, .boletoBadge {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.paymentText {
+  font-weight: 500;
+}
+
+.bottomBar {
+  background-color: #1b5e57; /* Um tom mais escuro e elegante de turquesa */
+  padding: 1.5rem 0;
+  font-size: 0.8rem;
+  color: #d1d5db; /* Texto um pouco mais acinzentado para ficar subtil */
+}
+
+.bottomContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.bottomContainer p {
+  margin: 0;
+}
+
+/* --- MEDIA QUERIES (RESPONSIVIDADE) --- */
+@media (max-width: 1024px) {
+  .container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .footer {
+    padding-top: 3rem;
+  }
+
+  .container {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .bottomContainer {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
 }
