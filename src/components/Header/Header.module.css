@@ -15,15 +15,13 @@
 .logoArea {
   display: flex;
   align-items: center;
-  cursor: pointer;
+  cursor: pointer;;
 }
 
 .logoImage {
-  height: 70px; 
-  width: auto; /* Mantém a proporção da imagem */
-  object-fit: contain;
+  height: 50px; 
+  width: auto; 
 }
-
 
 /* LAYOUT MOBILE (Padrão inicial)         */
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from './Header.module.css';
 import { Search, ShoppingCart, User, Menu, X } from 'lucide-react';
-import logoMarca from '../../assets/kalane-logo.png';
+import logoMarca from '../../assets/lachoe-logo.png';
 import { Link } from 'react-router-dom';
 
 const Header = () => {
@@ -23,7 +23,7 @@ const Header = () => {
         <a href="/" className={styles.logoArea}>
         <img 
           src={logoMarca} 
-          alt="Logo Kalanê Beauty" 
+          alt="Logo Lachoe Beauty" 
           className={styles.logoImage} 
         />
       </a>
