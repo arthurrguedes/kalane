@@ -1,0 +1,47 @@
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f9fafb;
+  padding: 2rem;
+  font-family: sans-serif;
+}
+
+.errorCard {
+  background-color: white;
+  padding: 3rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  max-width: 450px;
+  width: 100%;
+}
+
+.title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2rem;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.subtitle {
+  color: #6b7280;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.reloadBtn {
+  background-color: #38B2A6;
+  color: white;
+  padding: 0.875rem 2rem;
+  border-radius: 9999px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.reloadBtn:hover {
+  background-color: #1b5e57;
+}

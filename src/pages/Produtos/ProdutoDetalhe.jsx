@@ -3,11 +3,13 @@ import { useParams, Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Minus, Plus } from 'lucide-react';
 import { mockProducts } from '../../data/produtos';
 import styles from './ProdutoDetalhe.module.css';
+import { useCart } from '../../contexts/CartContext';
 
 const ProdutoDetalhe = () => {
   const { id } = useParams();
   const [quantidade, setQuantidade] = useState(1);
   const [produto, setProduto] = useState(null);
+  const { addToCart } = useCart();
 
   // Estados para o preenchimento dos ícones
   const [isFavorited, setIsFavorited] = useState(false);
@@ -125,7 +127,12 @@ const ProdutoDetalhe = () => {
               </p>
             </div>
             
-            <button className={styles.buyButton}>Comprar</button>
+            <button 
+              className={styles.buyButton} 
+              onClick={() => addToCart(produto, quantidade)}
+              >
+              Comprar
+            </button>
           </div>
         </div>
       </main>

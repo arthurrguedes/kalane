@@ -1,0 +1,18 @@
+.perfilContainer { display: flex; max-width: 1200px; margin: 2rem auto; gap: 2rem; padding: 0 1.5rem; min-height: 60vh; font-family: sans-serif; }
+.sidebar { width: 280px; background: white; border-radius: 1rem; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #f3f4f6; }
+.userInfo { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 2rem; border-bottom: 1px solid #f3f4f6; padding-bottom: 2rem; }
+.avatar { width: 64px; height: 64px; background-color: #38B2A6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-family: 'DM Serif Display', serif; margin-bottom: 1rem; }
+.userInfo h2 { font-family: 'DM Serif Display', serif; font-size: 1.25rem; color: #1f2937; margin-bottom: 0.25rem; }
+.userInfo p { font-size: 0.875rem; color: #6b7280; }
+.menu { display: flex; flex-direction: column; gap: 0.5rem; }
+.menu button { text-align: left; background: none; border: none; padding: 0.75rem 1rem; border-radius: 0.5rem; font-size: 0.95rem; color: #4b5563; cursor: pointer; transition: all 0.2s; }
+.menu button:hover { background-color: #f3f4f6; color: #38B2A6; }
+.menu button.active { background-color: #f0fdfa; color: #38B2A6; font-weight: 600; }
+.menu button.logoutBtn { color: #ef4444; margin-top: 1rem; }
+.menu button.logoutBtn:hover { background-color: #fef2f2; }
+.content { flex: 1; background: white; border-radius: 1rem; padding: 2.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #f3f4f6; }
+.title { font-family: 'DM Serif Display', serif; font-size: 2rem; color: #1f2937; margin-bottom: 2rem; }
+.emptyState { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 0; color: #6b7280; text-align: center; }
+.shopBtn { margin-top: 1.5rem; background-color: #38B2A6; color: white; border: none; padding: 0.75rem 2rem; border-radius: 9999px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
+.shopBtn:hover { background-color: #1b5e57; }
+@media (max-width: 768px) { .perfilContainer { flex-direction: column; } .sidebar { width: 100%; } }

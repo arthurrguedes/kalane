@@ -2,31 +2,36 @@ import React, { useState } from 'react';
 import styles from './Header.module.css';
 import { Search, ShoppingCart, User, Menu, X } from 'lucide-react';
 import logoMarca from '../../assets/lachoe-logo.png';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { useCart } from '../../contexts/CartContext';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  
+  const { user, logout } = useAuth();
+    const { toggleCart, cartCount } = useCart();
+  const navigate = useNavigate();
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+  const toggleProfileDropdown = () => setIsProfileDropdownOpen(!isProfileDropdownOpen);
+
+  const handleLogout = () => {
+    logout();
+    setIsProfileDropdownOpen(false);
+    navigate('/'); // Redireciona para a home ao sair
   };
 
-  const toggleProfileDropdown = () => {
-    setIsProfileDropdownOpen(!isProfileDropdownOpen);
-  };
+
 
   return (
     <header className={styles.header}>
       {/* LOGO */}
       <div className={styles.logoArea}>
-        <a href="/" className={styles.logoArea}>
-        <img 
-          src={logoMarca} 
-          alt="Logo Lachoe Beauty" 
-          className={styles.logoImage} 
-        />
-      </a>
+        <Link to="/" className={styles.logoArea}>
+          <img src={logoMarca} alt="Logo Lachoe Beauty" className={styles.logoImage} />
+        </Link>
       </div>
 
       {/* MENU DESKTOP */}
@@ -42,11 +47,7 @@ const Header = () => {
       {/* ÍCONES E BUSCA */}
       <div className={styles.headerActions}>
         <div className={styles.searchBox}>
-          <input 
-            type="text" 
-            placeholder="Buscar por produtos..." 
-            className={styles.searchInput}
-          />
+          <input type="text" placeholder="Buscar por produtos..." className={styles.searchInput} />
           <Search size={16} className={styles.searchIcon} />
         </div>
         
@@ -58,15 +59,37 @@ const Header = () => {
           
           {isProfileDropdownOpen && (
             <div className={styles.profileDropdown}>
-              <a href="/login">Login</a>
-              <a href="/cadastro">Cadastre-se</a>
+              {user ? (
+                <>
+                  <div className={styles.userInfo}>Olá, {user.email.split('@')[0]}</div>
+                  <Link to="/perfil" onClick={() => setIsProfileDropdownOpen(false)}>Meu Perfil</Link>
+                  <button onClick={handleLogout} className={styles.logoutBtn}>Sair</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" onClick={() => setIsProfileDropdownOpen(false)}>Login</Link>
+                  <Link to="/cadastro" onClick={() => setIsProfileDropdownOpen(false)}>Cadastre-se</Link>
+                </>
+              )}
             </div>
           )}
         </div>
 
-        <ShoppingCart size={24} className={styles.actionIcon} />
+        <div className={styles.cartWrapper} onClick={toggleCart} style={{ position: 'relative', cursor: 'pointer' }}>
+  <ShoppingCart size={24} className={styles.actionIcon} />
+  {cartCount > 0 && (
+    <span style={{ 
+      position: 'absolute', top: '-8px', right: '-8px', 
+      backgroundColor: '#ef4444', color: 'white', 
+      fontSize: '0.7rem', width: '18px', height: '18px', 
+      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+      borderRadius: '50%', fontWeight: 'bold' 
+    }}>
+      {cartCount}
+    </span>
+  )}
+</div>
 
-        {/* MENU HAMBÚRGUER (celular ONLY) */}
         <button className={styles.hamburgerBtn} onClick={toggleMobileMenu}>
           {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
@@ -75,12 +98,12 @@ const Header = () => {
       {/* MENU MOBILE */}
       {isMobileMenuOpen && (
         <nav className={styles.mobileNav}>
-          <a href="/" onClick={toggleMobileMenu}>Início</a>
-          <a href="/marca" onClick={toggleMobileMenu}>A Marca</a>
-          <a href="/produtos" onClick={toggleMobileMenu}>Produtos</a>
-          <a href="/kits" onClick={toggleMobileMenu}>Kits</a>
-          <a href="/mais-vendidos" onClick={toggleMobileMenu}>Mais Vendidos</a>
-          <a href="/contato" onClick={toggleMobileMenu}>Contato</a>
+          <Link to="/" onClick={toggleMobileMenu}>Início</Link>
+          <Link to="/marca" onClick={toggleMobileMenu}>A Marca</Link>
+          <Link to="/produtos" onClick={toggleMobileMenu}>Produtos</Link>
+          <Link to="/kits" onClick={toggleMobileMenu}>Kits</Link>
+          <Link to="/mais-vendidos" onClick={toggleMobileMenu}>Mais Vendidos</Link>
+          <Link to="/contato" onClick={toggleMobileMenu}>Contato</Link>
         </nav>
       )}
     </header>
