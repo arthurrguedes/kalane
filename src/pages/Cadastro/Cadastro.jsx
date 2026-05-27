@@ -14,7 +14,7 @@ const Cadastro = () => {
   const [aceitaMarketing, setAceitaMarketing] = useState(false);
   
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -56,10 +56,17 @@ const Cadastro = () => {
     }
 
     try {
-      await login(emailSanitizado, password);
+      await register({
+        nome: nomeSanitizado,
+        email: emailSanitizado,
+        password: password,
+        aceitouTermos,
+        aceitaMarketing
+      });
       navigate('/perfil');
     } catch (err) {
-      setError('Erro ao criar conta. Tente novamente.');
+      setError(err.message || 'Erro ao criar conta. Tente novamente.');
+      
     }
   };
 

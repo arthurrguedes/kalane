@@ -41,6 +41,20 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  const register = async (userData) => {
+    try {
+      // Cria a conta
+      await apiFetch('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(userData),
+      });
+      // Após criar a conta com sucesso, faz o login automático
+      await login(userData.email, userData.password);
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const login = async (email, password) => {
     try {
       const userData = await apiFetch('/auth/login', {
@@ -64,7 +78,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
       {loading ? <FullScreenLoading /> : children}
     </AuthContext.Provider>
   );
