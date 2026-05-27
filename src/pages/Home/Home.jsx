@@ -35,7 +35,7 @@ const Home = () => {
         <button className={styles.btnOutline}>Descubra Meus Aromas</button>
       </section>
 
-      {/* BANNER CAROUSEL */}
+      {/* BANNER CARROSSEL */}
       <section className={styles.carousel}>
         <button className={`${styles.carouselBtn} ${styles.prev}`}>
           <ChevronLeft size={64} />
@@ -46,7 +46,7 @@ const Home = () => {
         </button>
       </section>
 
-      {/* TESTIMONIALS */}
+      {/* TESTIMONIALS (DEPOIMENTOS) */}
       <section className={styles.testimonials}>
         <h2 className={styles.testimonialsTitle}>A experiência de nossos clientes</h2>
         

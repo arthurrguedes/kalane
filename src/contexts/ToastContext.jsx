@@ -23,7 +23,7 @@ export const ToastProvider = ({ children }) => {
   return (
     <ToastContext.Provider value={{ addToast }}>
       {children}
-      {/* Vamos renderizar o contentor dos toasts diretamente aqui para facilitar */}
+      {/* Renderização dos toasts diretamente para facilitar */}
       <div className="toast-container">
         {toasts.map((toast) => (
           <div key={toast.id} className={`toast toast-${toast.type}`}>

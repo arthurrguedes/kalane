@@ -39,7 +39,7 @@ const SideCart = () => {
             cartItems.map((item) => (
               <div key={item.id} className={styles.cartItem}>
                 <div className={styles.itemImage}>
-                  {/* Substituir futuramente pela imagem real do produto */}
+                  {/* Substituir pela imagem real do produto */}
                   <span>Img</span>
                 </div>
                 

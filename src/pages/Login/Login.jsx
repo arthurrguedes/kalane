@@ -20,14 +20,14 @@ const Login = () => {
 
     const emailSanitizado = email.trim();
 
-    // 1. Verificar campos vazios
+    // Verifica campos vazios
     if (!emailSanitizado || !password) {
       setError('Por favor, preencha todos os campos.');
       setIsLoading(false);
       return;
     }
 
-    // 2. Validar formato do e-mail
+    // Valida formato do e-mail
     if (!isValidEmail(emailSanitizado)) {
       setError('Por favor, insira um formato de e-mail válido.');
       setIsLoading(false);
@@ -87,7 +87,7 @@ const Login = () => {
           <button 
             type="submit" 
             className={styles.submitBtn}
-            disabled={isLoading} // Desativa o botão se estiver a carregar
+            disabled={isLoading} // Desativa o botão se estiver carregando
             style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
           >
             {isLoading ? (

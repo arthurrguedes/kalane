@@ -13,13 +13,13 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    // Aqui você pode registrar o erro em um serviço de monitoramento (ex: Sentry)
+    // Registro do erro em um serviço de monitoramento (como o Sentry)
     console.error('Erro capturado pelo Error Boundary:', error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
-      // Você pode renderizar qualquer UI de fallback (alternativa)
+      // Renderização de qualquer UI de fallback (alternativa)
       return (
         <div className={styles.errorContainer}>
           <div className={styles.errorCard}>
@@ -38,7 +38,7 @@ class ErrorBoundary extends React.Component {
       );
     }
 
-    // Se não houver erro, renderiza os componentes filhos normalmente
+    // Sem nenhum erro renderiza os componentes 'filhos' normalmente
     return this.props.children;
   }
 }

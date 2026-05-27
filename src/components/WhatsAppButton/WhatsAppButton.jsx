@@ -3,7 +3,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 import styles from './WhatsAppButton.module.css';
 
 const WhatsAppButton = () => {
-  const numeroWhatsApp = "5511999999999"; // Substituir pelo número real
+  const numeroWhatsApp = "5511999999999"; // Substituir pelo número real em breve
   const mensagem = "Olá! Gostaria de falar com vendas da Lachoe Beauty.";
   const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
 

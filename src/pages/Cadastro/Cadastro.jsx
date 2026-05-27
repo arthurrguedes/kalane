@@ -21,35 +21,35 @@ const Cadastro = () => {
     e.preventDefault();
     setError('');
 
-    // Sanitização básica (remover espaços em branco nas pontas)
+    // Limpeza básica (remover espaços em branco das pontas)
     const nomeSanitizado = nome.trim();
     const emailSanitizado = email.trim();
 
-    // 1. Validação de Nome
+    // Validação de Nome
     if (!isValidName(nomeSanitizado)) {
       setError('Por favor, insira seu nome e sobrenome.');
       return;
     }
 
-    // 2. Validação de E-mail
+    // Validação de E-mail
     if (!isValidEmail(emailSanitizado)) {
       setError('Insira um formato de e-mail válido.');
       return;
     }
 
-    // 3. Validação de Força da Senha
+    // Validação de Força da Senha
     if (!isStrongPassword(password)) {
       setError('A senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula, um número e um caractere especial (@$!%*?&).');
       return;
     }
 
-    // 4. Confirmação de Senha
+    // Confirmação de Senha
     if (password !== confirmPassword) {
       setError('As senhas não coincidem.');
       return;
     }
 
-    // 5. Consentimento
+    // Consentimento
     if (!aceitouTermos) {
       setError('Você precisa aceitar os Termos de Uso e a Política de Privacidade.');
       return;

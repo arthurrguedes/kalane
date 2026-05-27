@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 1. Verifica a sessão inicial ao carregar a página
+  // Verificação da sessão inicial ao carregar a página
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -23,19 +23,19 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // 2. INTERCETOR GLOBA: Escuta o evento 'session-expired'
+  // Intereceptor Global: Escuta o evento 'session-expired'
   useEffect(() => {
     const handleSessionExpired = () => {
       console.warn('A sessão expirou. A terminar a sessão do utilizador por segurança...');
       setUser(null);
-      // Como o estado 'user' passa a null, o ProtectedRoute (que criámos anteriormente)
-      // vai detetar isto instantaneamente e redirecionar o utilizador para a página de /login.
+      // Como o estado user passa a null, o ProtectedRoute...
+      // vai detectar isso na mesma hora e redirecionar o utilizador para a página de login.
     };
 
-    // Fica à escuta do evento disparado pelo api.js
+    // Fica na escuta do evento disparado pelo api.js
     window.addEventListener('session-expired', handleSessionExpired);
 
-    // Limpa o listener quando o componente for desmontado (boa prática)
+    // Limpa o listener quando o componente for desmontado
     return () => {
       window.removeEventListener('session-expired', handleSessionExpired);
     };

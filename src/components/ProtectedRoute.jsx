@@ -10,7 +10,7 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Se estiver logado, renderiza a rota filha normalmente
+  // Se estiver logado, renderiza a rota 'filha' normalmente
   return children;
 };
 

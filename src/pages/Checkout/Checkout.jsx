@@ -10,7 +10,7 @@ const Checkout = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Estados para a morada de entrega
+  // Estados para o endereço de entrega
   const [morada, setMorada] = useState({
     codigoPostal: '',
     rua: '',
@@ -18,7 +18,7 @@ const Checkout = () => {
     cidade: '',
   });
 
-  // Estados para o pagamento (Simulação)
+  // Estados para o pagamento (simulação)
   const [pagamento, setPagamento] = useState({
     numeroCartao: '',
     nomeTitular: '',
@@ -62,7 +62,7 @@ const Checkout = () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
       
       clearCart();
-      // Futuramente, podemos redirecionar para uma página de "Encomenda Concluída"
+      // Futuramente, será redirecionado para uma página de "Encomenda Concluída"
       navigate('/perfil'); 
     } catch (err) {
       setError('Ocorreu um erro ao processar o seu pagamento. Tente novamente.');
@@ -89,7 +89,7 @@ const Checkout = () => {
           <section className={styles.formCard}>
             <div className={styles.cardHeader}>
               <Truck size={24} className={styles.icon} />
-              <h2>Morada de Entrega</h2>
+              <h2>Endereço de Entrega</h2>
             </div>
             
             <div className={styles.inputGrid}>

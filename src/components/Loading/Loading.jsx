@@ -7,7 +7,7 @@ export const FullScreenLoading = () => {
   return (
     <div className={styles.fullScreen}>
       <Loader2 className={styles.spinner} size={48} />
-      <p>A carregar...</p>
+      <p>Carregando....</p>
     </div>
   );
 };
