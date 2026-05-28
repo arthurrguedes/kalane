@@ -76,8 +76,19 @@ const ProdutoDetalhe = () => {
   if (isLoading) return <FullScreenLoading />;
   if (!produto) return <div className={styles.container}>Produto não encontrado.</div>;
 
-  const handleIncrement = () => setQuantidade(q => q + 1);
+  // --- LÓGICA DE ESTOQUE IMPLEMENTADA AQUI ---
+  const semEstoque = produto.estoque <= 0;
+
+  const handleIncrement = () => {
+    if (quantidade < produto.estoque) {
+      setQuantidade(q => q + 1);
+    } else {
+      addToast(`Temos apenas ${produto.estoque} unidades disponíveis.`, 'error');
+    }
+  };
+  
   const handleDecrement = () => setQuantidade(q => (q > 1 ? q - 1 : 1));
+  // ---------------------------------------------
 
   const valorTotal = produto.price * quantidade;
   const numParcelas = Math.max(Math.min(quantidade, 3), 1); // Evita divisão por zero
@@ -132,16 +143,18 @@ const ProdutoDetalhe = () => {
               />
             </button>
 
-            {/* Botão Carrinho */}
+            {/* Botão Carrinho - Desabilitado se não houver estoque */}
             <button 
               onClick={handleAddToCart} 
               className={styles.iconBtn}
               aria-label="Adicionar ao carrinho"
+              disabled={semEstoque}
+              style={{ cursor: semEstoque ? 'not-allowed' : 'pointer', opacity: semEstoque ? 0.5 : 1 }}
             >
               <ShoppingCart 
                 size={28} 
                 strokeWidth={1.5} 
-                color="#38B2A6"
+                color={semEstoque ? "#999" : "#38B2A6"}
                 fill={isAddedToCart ? "#38B2A6" : "none"}
                 className={styles.animatedIcon}
               />
@@ -154,30 +167,37 @@ const ProdutoDetalhe = () => {
 
           <p className={styles.description}>{produto.description}</p>
 
-          <div className={styles.quantityWrapper}>
+          {/* Controle de Quantidade - Só permite mexer se tiver estoque */}
+          <div className={styles.quantityWrapper} style={{ opacity: semEstoque ? 0.5 : 1 }}>
             <span className={styles.quantityLabel}>Quantidade</span>
             <div className={styles.quantityControl}>
-              <button onClick={handleDecrement}><Minus size={16} /></button>
-              <span>{quantidade}</span>
-              <button onClick={handleIncrement}><Plus size={16} /></button>
+              <button onClick={handleDecrement} disabled={semEstoque}><Minus size={16} /></button>
+              <span>{semEstoque ? 0 : quantidade}</span>
+              <button onClick={handleIncrement} disabled={semEstoque}><Plus size={16} /></button>
             </div>
           </div>
 
           <div className={styles.purchaseSection}>
             <div className={styles.totalInfo}>
               <p className={styles.totalPrice}>
-                Total: <span>R$ {valorTotal.toFixed(2).replace('.', ',')}</span>
+                Total: <span>R$ {(semEstoque ? 0 : valorTotal).toFixed(2).replace('.', ',')}</span>
               </p>
               <p className={styles.installments}>
-                Em até {numParcelas}x de R$ {valorParcela.toFixed(2).replace('.', ',')}
+                Em até {numParcelas}x de R$ {(semEstoque ? 0 : valorParcela).toFixed(2).replace('.', ',')}
               </p>
             </div>
             
+            {/* Botão Comprar - Modificado visualmente quando esgotado */}
             <button 
               className={styles.buyButton} 
               onClick={handleAddToCart}
+              disabled={semEstoque}
+              style={{ 
+                backgroundColor: semEstoque ? '#ccc' : '',
+                cursor: semEstoque ? 'not-allowed' : 'pointer'
+              }}
             >
-              Comprar
+              {semEstoque ? 'Produto Esgotado' : 'Comprar'}
             </button>
           </div>
         </div>

@@ -24,6 +24,8 @@ const Header = () => {
     navigate('/');
   };
 
+  console.log("Usuário no Header:", user);
+
   return (
     <header className={styles.header}>
       {/* LOGO */}
@@ -38,6 +40,11 @@ const Header = () => {
         <Link to="/">Início</Link>
         <Link to="/marca">A Marca</Link>
         <Link to="/produtos">Produtos</Link>
+        {user && user.isAdmin && (
+          <Link to="/admin/estoque" className={styles.adminLink}>
+            Estoque
+          </Link>
+        )}
         <Link to="/kits">Kits</Link>
         <Link to="/mais-vendidos">Mais Vendidos</Link>
         <Link to="/contato">Contato</Link>
@@ -118,6 +125,9 @@ const Header = () => {
           <Link to="/" onClick={toggleMobileMenu}>Início</Link>
           <Link to="/marca" onClick={toggleMobileMenu}>A Marca</Link>
           <Link to="/produtos" onClick={toggleMobileMenu}>Produtos</Link>
+          {user && user.isAdmin && (
+          <Link to="/admin/estoque" className={styles.adminLink}>Estoque</Link>
+          )}
           <Link to="/kits" onClick={toggleMobileMenu}>Kits</Link>
           <Link to="/mais-vendidos" onClick={toggleMobileMenu}>Mais Vendidos</Link>
           <Link to="/contato" onClick={toggleMobileMenu}>Contato</Link>

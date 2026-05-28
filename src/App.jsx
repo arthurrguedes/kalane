@@ -20,6 +20,8 @@ import SideCart from './components/SideCart/SideCart';
 import ScrollToTop from './components/ScrollToTop';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './contexts/ToastContext';
+import AdminEstoque from './pages/Admin/AdminEstoque';
+import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 import './index.css';
 
 const App = () => {
@@ -45,6 +47,7 @@ const App = () => {
             <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
             <Route path="/esqueci-minha-senha" element={<EsqueciSenha />} />
             <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+            <Route path="/admin/estoque" element={<ProtectedAdminRoute><AdminEstoque /></ProtectedAdminRoute>} />
           </Routes>
         </main>
         <Footer />

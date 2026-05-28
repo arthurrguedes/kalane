@@ -13,7 +13,11 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       try {
         const userData = await apiFetch('/auth/me');
-        setUser(userData);
+        setUser({
+          id: userData.id,
+          email: userData.email,
+          isAdmin: userData.isAdmin || false
+        });
       } catch (error) {
         setUser(null);
       } finally {
@@ -55,13 +59,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password) => {
+const login = async (email, password) => {
     try {
       const userData = await apiFetch('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
-      setUser(userData); 
+      
+      // Define o objeto do usuário incluindo o isAdmin
+      setUser({
+        id: userData.id,
+        email: userData.email,
+        isAdmin: userData.isAdmin || false // Se o backend esquecer, garante que é false
+      });
+      
     } catch (error) {
       throw error;
     }
