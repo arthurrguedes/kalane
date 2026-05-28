@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext'; // <- Importando o Toast
+import { apiFetch } from '../../services/api'; // <- Importando o apiFetch
 import { CreditCard, Truck, ShieldCheck } from 'lucide-react';
 import styles from './Checkout.module.css';
 
 const Checkout = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
+  const { addToast } = useToast();
   const navigate = useNavigate();
 
   // Estados para o endereço de entrega
@@ -18,7 +21,7 @@ const Checkout = () => {
     cidade: '',
   });
 
-  // Estados para o pagamento (simulação)
+  // Estados para o pagamento
   const [pagamento, setPagamento] = useState({
     numeroCartao: '',
     nomeTitular: '',
@@ -47,7 +50,7 @@ const Checkout = () => {
     setError('');
     setIsProcessing(true);
 
-    // Validação básica
+    // Validação básica do formulário
     if (!morada.codigoPostal || !morada.rua || !pagamento.numeroCartao) {
       setError('Por favor, preencha todos os campos obrigatórios.');
       setIsProcessing(false);
@@ -55,17 +58,27 @@ const Checkout = () => {
     }
 
     try {
-      // Aqui entraria a chamada à API do NestJS para processar o pagamento
-      // ex: await apiFetch('/orders/checkout', { method: 'POST', body: ... })
+      // 1. Envia os dados para a nossa API no backend criar o pedido
+      const response = await apiFetch('/pedidos/checkout', {
+        method: 'POST',
+        body: JSON.stringify({
+          delivery_address: morada,
+          payment_method: 'Cartão de Crédito', // Fixo por enquanto, conforme seu layout
+        }),
+      });
       
-      // Simulação de processamento
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // 2. Avisa que deu tudo certo
+      addToast('Pedido finalizado com sucesso!', 'success');
       
+      // 3. Limpa o carrinho local da tela
       clearCart();
-      // Futuramente, será redirecionado para uma página de "Encomenda Concluída"
-      navigate('/perfil'); 
+      
+      // 4. Redireciona para o Perfil, abrindo diretamente a aba de Pedidos
+      navigate('/perfil', { state: { tab: 'pedidos' } }); 
+
     } catch (err) {
-      setError('Ocorreu um erro ao processar o seu pagamento. Tente novamente.');
+      setError(err.message || 'Ocorreu um erro ao processar o seu pagamento. Tente novamente.');
+      addToast('Erro ao finalizar pedido', 'error');
     } finally {
       setIsProcessing(false);
     }

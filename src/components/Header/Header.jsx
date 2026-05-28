@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styles from './Header.module.css';
-import { Search, ShoppingCart, User, Menu, X } from 'lucide-react';
+// Adicionados: Package, Heart, LogOut
+import { Search, ShoppingCart, User, Menu, X, Package, Heart, LogOut } from 'lucide-react';
 import logoMarca from '../../assets/lachoe-logo.png';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,7 +12,7 @@ const Header = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   
   const { user, logout } = useAuth();
-    const { toggleCart, cartCount } = useCart();
+  const { toggleCart, cartCount } = useCart();
   const navigate = useNavigate();
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -20,10 +21,8 @@ const Header = () => {
   const handleLogout = () => {
     logout();
     setIsProfileDropdownOpen(false);
-    navigate('/'); // Redireciona para a home ao sair
+    navigate('/');
   };
-
-
 
   return (
     <header className={styles.header}>
@@ -61,9 +60,27 @@ const Header = () => {
             <div className={styles.profileDropdown}>
               {user ? (
                 <>
-                  <div className={styles.userInfo}>Olá, {user.email.split('@')[0]}</div>
-                  <Link to="/perfil" onClick={() => setIsProfileDropdownOpen(false)}>Meu Perfil</Link>
-                  <button onClick={handleLogout} className={styles.logoutBtn}>Sair</button>
+                  <div className={styles.userInfoDropdown}>
+                    <span className={styles.greeting}>Olá,</span>
+                    <span className={styles.userName}>{user.email.split('@')[0]}</span>
+                  </div>
+                  <div className={styles.dropdownDivider}></div>
+                  
+                  {/* Links com o state indicando a aba */}
+                  <Link to="/perfil" state={{ tab: 'dados' }} onClick={() => setIsProfileDropdownOpen(false)}>
+                    <User size={16} /> Meu Perfil
+                  </Link>
+                  <Link to="/perfil" state={{ tab: 'pedidos' }} onClick={() => setIsProfileDropdownOpen(false)}>
+                    <Package size={16} /> Meus Pedidos
+                  </Link>
+                  <Link to="/perfil" state={{ tab: 'favoritos' }} onClick={() => setIsProfileDropdownOpen(false)}>
+                    <Heart size={16} /> Meus Favoritos
+                  </Link>
+                  
+                  <div className={styles.dropdownDivider}></div>
+                  <button onClick={handleLogout} className={styles.logoutBtnDropdown}>
+                    <LogOut size={16} /> Sair da conta
+                  </button>
                 </>
               ) : (
                 <>
@@ -76,19 +93,19 @@ const Header = () => {
         </div>
 
         <div className={styles.cartWrapper} onClick={toggleCart} style={{ position: 'relative', cursor: 'pointer' }}>
-  <ShoppingCart size={24} className={styles.actionIcon} />
-  {cartCount > 0 && (
-    <span style={{ 
-      position: 'absolute', top: '-8px', right: '-8px', 
-      backgroundColor: '#ef4444', color: 'white', 
-      fontSize: '0.7rem', width: '18px', height: '18px', 
-      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-      borderRadius: '50%', fontWeight: 'bold' 
-    }}>
-      {cartCount}
-    </span>
-  )}
-</div>
+          <ShoppingCart size={24} className={styles.actionIcon} />
+          {cartCount > 0 && (
+            <span style={{ 
+              position: 'absolute', top: '-8px', right: '-8px', 
+              backgroundColor: '#ef4444', color: 'white', 
+              fontSize: '0.7rem', width: '18px', height: '18px', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center', 
+              borderRadius: '50%', fontWeight: 'bold' 
+            }}>
+              {cartCount}
+            </span>
+          )}
+        </div>
 
         <button className={styles.hamburgerBtn} onClick={toggleMobileMenu}>
           {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}

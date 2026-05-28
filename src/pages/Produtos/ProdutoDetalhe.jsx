@@ -1,40 +1,86 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Minus, Plus } from 'lucide-react';
-import { mockProducts } from '../../data/produtos';
+import { apiFetch } from '../../services/api';
+import { FullScreenLoading } from '../../components/Loading/Loading';
 import styles from './ProdutoDetalhe.module.css';
 import { useCart } from '../../contexts/CartContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 
 const ProdutoDetalhe = () => {
   const { id } = useParams();
   const [quantidade, setQuantidade] = useState(1);
   const [produto, setProduto] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
   const { addToCart } = useCart();
+  const { user } = useAuth();
+  const { addToast } = useToast();
 
-  // Estados para o preenchimento dos ícones
   const [isFavorited, setIsFavorited] = useState(false);
   const [isAddedToCart, setIsAddedToCart] = useState(false);
-
-  // Estados para o Zoom da imagem
   const [bgPosition, setBgPosition] = useState('50% 50%');
   const [isZoomed, setIsZoomed] = useState(false);
 
+  // Busca o produto e verifica se está nos favoritos do usuário logado
   useEffect(() => {
-    const produtoEncontrado = mockProducts.find(p => p.id === Number(id));
-    if (produtoEncontrado) {
-      setProduto(produtoEncontrado);
-    }
-  }, [id]);
+    const carregarDados = async () => {
+      try {
+        const produtoData = await apiFetch(`/produtos/${id}`);
+        setProduto(produtoData);
 
-  if (!produto) {
-    return <div className={styles.container}>Produto não encontrado.</div>;
-  }
+        if (user) {
+          const favoritosData = await apiFetch('/favoritos');
+          const jaFavoritado = favoritosData.some(fav => fav.products.id === Number(id));
+          setIsFavorited(jaFavoritado);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    carregarDados();
+  }, [id, user]);
+
+  // Função para favoritar no banco de dados
+  const handleToggleFavorite = async () => {
+    if (!user) {
+      addToast('Faça login para favoritar produtos.', 'error');
+      return;
+    }
+
+    setIsFavorited(!isFavorited); // Atualiza a tela imediatamente (Optimistic UI)
+
+    try {
+      const response = await apiFetch('/favoritos/toggle', {
+        method: 'POST',
+        body: JSON.stringify({ product_id: produto.id }),
+      });
+      addToast(response.message, 'success');
+    } catch (error) {
+      setIsFavorited(!isFavorited); // Reverte se der erro
+      addToast('Erro ao atualizar favoritos.', 'error');
+    }
+  };
+
+  // Função para adicionar ao carrinho (usada no botão e no ícone)
+  const handleAddToCart = () => {
+    addToCart(produto, quantidade);
+    setIsAddedToCart(true);
+    setTimeout(() => setIsAddedToCart(false), 2000); // Feedback visual temporário no ícone
+  };
+
+  if (isLoading) return <FullScreenLoading />;
+  if (!produto) return <div className={styles.container}>Produto não encontrado.</div>;
 
   const handleIncrement = () => setQuantidade(q => q + 1);
   const handleDecrement = () => setQuantidade(q => (q > 1 ? q - 1 : 1));
 
   const valorTotal = produto.price * quantidade;
-  const numParcelas = Math.min(quantidade, 3);
+  const numParcelas = Math.max(Math.min(quantidade, 3), 1); // Evita divisão por zero
   const valorParcela = valorTotal / numParcelas;
 
   const handleMouseMove = (e) => {
@@ -44,7 +90,7 @@ const ProdutoDetalhe = () => {
     setBgPosition(`${x}% ${y}%`);
   };
 
-  const imageUrl = "https://via.placeholder.com/800x600/D9D9D9/6b7280?text=Sua+Imagem+Aqui";
+  const imageUrl = produto.image_url || "https://via.placeholder.com/800x600/D9D9D9/6b7280?text=Sua+Imagem+Aqui";
 
   return (
     <div className={styles.container}>
@@ -73,7 +119,7 @@ const ProdutoDetalhe = () => {
           <div className={styles.actionIcons}>
             {/* Botão Favoritar */}
             <button 
-              onClick={() => setIsFavorited(!isFavorited)} 
+              onClick={handleToggleFavorite} 
               className={styles.iconBtn}
               aria-label="Favoritar"
             >
@@ -88,7 +134,7 @@ const ProdutoDetalhe = () => {
 
             {/* Botão Carrinho */}
             <button 
-              onClick={() => setIsAddedToCart(!isAddedToCart)} 
+              onClick={handleAddToCart} 
               className={styles.iconBtn}
               aria-label="Adicionar ao carrinho"
             >
@@ -129,8 +175,8 @@ const ProdutoDetalhe = () => {
             
             <button 
               className={styles.buyButton} 
-              onClick={() => addToCart(produto, quantidade)}
-              >
+              onClick={handleAddToCart}
+            >
               Comprar
             </button>
           </div>

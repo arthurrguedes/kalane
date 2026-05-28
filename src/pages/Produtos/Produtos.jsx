@@ -1,16 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { mockProducts } from '../../data/produtos';
+import { apiFetch } from '../../services/api'; // Nova importação
+import { FullScreenLoading } from '../../components/Loading/Loading'; // Loading
 import styles from './Produtos.module.css';
 
 const tiposDisponiveis = ['Bodysplash', 'Sabonete', 'Loção'];
 const aromasDisponiveis = ['Doce', 'Cítrico', 'Floral', 'Frutado', 'Amadeirado'];
 
 const Produtos = () => {
+  const [produtosBanco, setProdutosBanco] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [maxPrice, setMaxPrice] = useState(150);
   const [tiposSelecionados, setTiposSelecionadas] = useState([]);
   const [aromasSelecionados, setAromasSelecionados] = useState([]);
   const navigate = useNavigate();
+
+  // Busca os produtos na API ao carregar a página
+useEffect(() => {
+    const carregarProdutos = async () => {
+      try {
+        console.log("Iniciando busca de produtos...");
+        const data = await apiFetch('/produtos');
+        console.log("Dados recebidos da API:", data); // <- ADICIONE ESTA LINHA
+        setProdutosBanco(data);
+      } catch (error) {
+        console.error('ERRO DETALHADO ao carregar produtos:', error.message); // <- MELHORE O LOG DE ERRO
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    carregarProdutos();
+  }, []);
 
   const handleTipoChange = (tipo) => {
     setTiposSelecionadas((prev) => 
@@ -24,14 +44,16 @@ const Produtos = () => {
     );
   };
 
-  // Lógica de filtragem cruzada
-  const filteredProducts = mockProducts.filter((product) => {
+  // Atualiza para filtrar a partir do estado do banco
+  const filteredProducts = produtosBanco.filter((product) => {
     const atendePreco = product.price <= maxPrice;
     const atendeTipo = tiposSelecionados.length === 0 || tiposSelecionados.includes(product.category);
     const atendeAroma = aromasSelecionados.length === 0 || aromasSelecionados.includes(product.aroma);
 
     return atendePreco && atendeTipo && atendeAroma;
   });
+
+  if (isLoading) return <FullScreenLoading />; // Feedback visual enquanto carrega
 
   return (
     <div className={styles.container}>
