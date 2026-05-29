@@ -1,257 +1,281 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { useToast } from '../../contexts/ToastContext'; // <- Importando o Toast
-import { apiFetch } from '../../services/api'; // <- Importando o apiFetch
-import { CreditCard, Truck, ShieldCheck } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
+import { apiFetch } from '../../services/api';
+import { Tag, Check, X, Loader } from 'lucide-react';
 import styles from './Checkout.module.css';
 
 const Checkout = () => {
+  const navigate = useNavigate();
   const { cartItems, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
   const { addToast } = useToast();
-  const navigate = useNavigate();
 
-  // Estados para o endereço de entrega
-  const [morada, setMorada] = useState({
-    codigoPostal: '',
-    rua: '',
-    numero: '',
-    cidade: '',
+  // 1. Estados do Formulário (Agora atende Logados e Visitantes)
+  const [formData, setFormData] = useState({
+    nome: '',
+    email: '',
+    whatsapp: '',
+    endereco: '',
+    cep: '',
   });
 
-  // Estados para o pagamento
-  const [pagamento, setPagamento] = useState({
-    numeroCartao: '',
-    nomeTitular: '',
-    validade: '',
-    cvv: '',
-  });
+  // 2. Estados do Cupom
+  const [cupomInput, setCupomInput] = useState('');
+  const [cupomAplicado, setCupomAplicado] = useState(null);
+  const [validandoCupom, setValidandoCupom] = useState(false);
+  const [processandoCompra, setProcessandoCompra] = useState(false);
 
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState('');
-
-  // Se o carrinho estiver vazio, redireciona para a loja
-  if (cartItems.length === 0) {
-    return (
-      <div className={styles.emptyCheckout}>
-        <h2>O seu carrinho está vazio</h2>
-        <p>Adicione produtos antes de prosseguir para o checkout.</p>
-        <button onClick={() => navigate('/produtos')} className={styles.btnPrimary}>
-          Voltar à Loja
-        </button>
-      </div>
-    );
-  }
-
-  const handleFinalizarEncomenda = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsProcessing(true);
-
-    // Validação básica do formulário
-    if (!morada.codigoPostal || !morada.rua || !pagamento.numeroCartao) {
-      setError('Por favor, preencha todos os campos obrigatórios.');
-      setIsProcessing(false);
-      return;
+  // Se o usuário estiver logado, já preenchemos os dados conhecidos
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        email: user.email || '',
+        // Se você tiver o nome/telefone no contexto do usuário, coloque aqui:
+        // nome: user.nome || '', 
+      }));
     }
+  }, [user]);
 
-    try {
-      // 1. Envia os dados para a nossa API no backend criar o pedido
-      const response = await apiFetch('/pedidos/checkout', {
-        method: 'POST',
-        body: JSON.stringify({
-          delivery_address: morada,
-          payment_method: 'Cartão de Crédito', // Fixo por enquanto, conforme seu layout
-        }),
-      });
-      
-      // 2. Avisa que deu tudo certo
-      addToast('Pedido finalizado com sucesso!', 'success');
-      
-      // 3. Limpa o carrinho local da tela
-      clearCart();
-      
-      // 4. Redireciona para o Perfil, abrindo diretamente a aba de Pedidos
-      navigate('/perfil', { state: { tab: 'pedidos' } }); 
+  // Redireciona se o carrinho estiver vazio
+  useEffect(() => {
+    if (cartItems.length === 0 && !processandoCompra) {
+      navigate('/produtos');
+    }
+  }, [cartItems, navigate, processandoCompra]);
 
-    } catch (err) {
-      setError(err.message || 'Ocorreu um erro ao processar o seu pagamento. Tente novamente.');
-      addToast('Erro ao finalizar pedido', 'error');
-    } finally {
-      setIsProcessing(false);
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    
+    // Se o cliente mudar o e-mail, removemos o cupom por segurança
+    // (para ele não validar com um e-mail e comprar com outro)
+    if (e.target.name === 'email' && cupomAplicado) {
+      setCupomAplicado(null);
+      addToast('Cupom removido porque o e-mail foi alterado.', 'info');
     }
   };
 
-  const taxaEntrega = 15.00; // Valor fixo de exemplo
-  const totalFinal = cartTotal + taxaEntrega;
+  // 3. Lógica de Validação do Cupom
+  const handleAplicarCupom = async () => {
+    if (!cupomInput.trim()) return;
+    
+    if (!formData.email.trim()) {
+      addToast('Por favor, preencha seu e-mail antes de aplicar o cupom.', 'warning');
+      return;
+    }
+
+    setValidandoCupom(true);
+    try {
+      const response = await apiFetch('/cupons/validar', {
+        method: 'POST',
+        body: JSON.stringify({ 
+          codigo: cupomInput, 
+          emailCliente: formData.email 
+        }),
+      });
+
+      setCupomAplicado({
+        id: response.id,
+        codigo: response.codigo,
+        percentual: response.percentual
+      });
+      addToast(`Cupom de ${response.percentual}% aplicado!`, 'success');
+      setCupomInput(''); // Limpa o input
+    } catch (error) {
+      addToast(error.message || 'Cupom inválido.', 'error');
+      setCupomAplicado(null);
+    } finally {
+      setValidandoCupom(false);
+    }
+  };
+
+  const handleRemoverCupom = () => {
+    setCupomAplicado(null);
+    addToast('Cupom removido.', 'info');
+  };
+
+  // 4. Matemática do Carrinho
+  const valorDesconto = cupomAplicado 
+    ? (cartTotal * (cupomAplicado.percentual / 100)) 
+    : 0;
+  const valorFinal = cartTotal - valorDesconto;
+
+  // 5. Finalização da Compra
+  const handleFinalizarCompra = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.nome || !formData.email || !formData.whatsapp) {
+      addToast('Preencha os dados de contato obrigatórios.', 'warning');
+      return;
+    }
+
+    setProcessandoCompra(true);
+
+    try {
+      // Como você pode ter vários itens no carrinho, idealmente seu backend 
+      // recebe um array de itens. Aqui simulamos o envio.
+      await apiFetch('/orders', {
+        method: 'POST',
+        body: JSON.stringify({
+          cliente: {
+            nome: formData.nome,
+            email: formData.email,
+            whatsapp: formData.whatsapp,
+            endereco: formData.endereco,
+            cep: formData.cep
+          },
+          itens: cartItems.map(item => ({
+            produtoId: item.id,
+            quantidade: item.quantidade || 1
+          })),
+          cupomId: cupomAplicado?.id || null, // Manda o ID do cupom se houver
+          totalPago: valorFinal
+        }),
+      });
+
+      addToast('Pedido realizado com sucesso!', 'success');
+      clearCart();
+      navigate('/sucesso'); // Crie uma página de sucesso depois!
+
+    } catch (error) {
+      addToast(error.message || 'Erro ao processar o pedido.', 'error');
+    } finally {
+      setProcessandoCompra(false);
+    }
+  };
+
+  if (cartItems.length === 0 && !processandoCompra) return null;
 
   return (
     <div className={styles.checkoutContainer}>
-      <h1 className={styles.pageTitle}>Finalizar Encomenda</h1>
-
-      {error && <div className={styles.errorMessage}>{error}</div>}
-
-      <form onSubmit={handleFinalizarEncomenda} className={styles.checkoutGrid}>
+      <div className={styles.checkoutGrid}>
         
-        {/* COLUNA ESQUERDA: Formulários */}
-        <div className={styles.formsSection}>
-          
-          {/* Seção de Entrega */}
-          <section className={styles.formCard}>
-            <div className={styles.cardHeader}>
-              <Truck size={24} className={styles.icon} />
-              <h2>Endereço de Entrega</h2>
+        {/* COLUNA ESQUERDA: DADOS DO CLIENTE */}
+        <section className={styles.formSection}>
+          <h2>Finalizar Compra</h2>
+          {!user && (
+            <div className={styles.guestNotice}>
+              Você está comprando como visitante. <a href="/login">Faça login</a> para salvar seu histórico.
             </div>
-            
-            <div className={styles.inputGrid}>
-              <div className={styles.inputGroup}>
-                <label>Código Postal</label>
-                <input 
-                  type="text" 
-                  value={morada.codigoPostal}
-                  onChange={(e) => setMorada({...morada, codigoPostal: e.target.value})}
-                  placeholder="00000-000"
-                  required
-                />
-              </div>
-              <div className={`${styles.inputGroup} ${styles.colSpan2}`}>
-                <label>Rua / Avenida</label>
-                <input 
-                  type="text" 
-                  value={morada.rua}
-                  onChange={(e) => setMorada({...morada, rua: e.target.value})}
-                  placeholder="Ex: Rua das Flores"
-                  required
-                />
-              </div>
-              <div className={styles.inputGroup}>
-                <label>Número</label>
-                <input 
-                  type="text" 
-                  value={morada.numero}
-                  onChange={(e) => setMorada({...morada, numero: e.target.value})}
-                  required
-                />
-              </div>
-              <div className={styles.inputGroup}>
-                <label>Cidade</label>
-                <input 
-                  type="text" 
-                  value={morada.cidade}
-                  onChange={(e) => setMorada({...morada, cidade: e.target.value})}
-                  required
-                />
-              </div>
-            </div>
-          </section>
+          )}
 
-          {/* Seção de Pagamento */}
-          <section className={styles.formCard}>
-            <div className={styles.cardHeader}>
-              <CreditCard size={24} className={styles.icon} />
-              <h2>Pagamento Seguro</h2>
+          <form id="checkout-form" onSubmit={handleFinalizarCompra} className={styles.form}>
+            <div className={styles.inputGroup}>
+              <label>Nome Completo *</label>
+              <input type="text" name="nome" required value={formData.nome} onChange={handleInputChange} />
             </div>
-            
-            <div className={styles.inputGrid}>
-              <div className={`${styles.inputGroup} ${styles.colSpan2}`}>
-                <label>Número do Cartão</label>
-                <input 
-                  type="text" 
-                  value={pagamento.numeroCartao}
-                  onChange={(e) => setPagamento({...pagamento, numeroCartao: e.target.value})}
-                  placeholder="0000 0000 0000 0000"
-                  maxLength="19"
-                  required
-                />
-              </div>
-              <div className={`${styles.inputGroup} ${styles.colSpan2}`}>
-                <label>Nome do Titular</label>
-                <input 
-                  type="text" 
-                  value={pagamento.nomeTitular}
-                  onChange={(e) => setPagamento({...pagamento, nomeTitular: e.target.value})}
-                  placeholder="Tal como impresso no cartão"
-                  required
-                />
-              </div>
-              <div className={styles.inputGroup}>
-                <label>Validade (MM/AA)</label>
-                <input 
-                  type="text" 
-                  value={pagamento.validade}
-                  onChange={(e) => setPagamento({...pagamento, validade: e.target.value})}
-                  placeholder="MM/AA"
-                  maxLength="5"
-                  required
-                />
-              </div>
-              <div className={styles.inputGroup}>
-                <label>CVV</label>
-                <input 
-                  type="text" 
-                  value={pagamento.cvv}
-                  onChange={(e) => setPagamento({...pagamento, cvv: e.target.value})}
-                  placeholder="123"
-                  maxLength="4"
-                  required
-                />
-              </div>
-            </div>
-          </section>
-        </div>
 
-        {/* COLUNA DIREITA: Resumo */}
+            <div className={styles.row}>
+              <div className={styles.inputGroup}>
+                <label>E-mail *</label>
+                <input 
+                  type="email" 
+                  name="email" 
+                  required 
+                  value={formData.email} 
+                  onChange={handleInputChange}
+                  disabled={!!user} // Trava o e-mail se já estiver logado
+                />
+              </div>
+              <div className={styles.inputGroup}>
+                <label>WhatsApp *</label>
+                <input type="tel" name="whatsapp" required value={formData.whatsapp} onChange={handleInputChange} placeholder="(11) 99999-9999" />
+              </div>
+            </div>
+
+            <div className={styles.row}>
+              <div className={styles.inputGroup}>
+                <label>CEP</label>
+                <input type="text" name="cep" value={formData.cep} onChange={handleInputChange} />
+              </div>
+              <div className={styles.inputGroup} style={{ flex: 2 }}>
+                <label>Endereço Completo</label>
+                <input type="text" name="endereco" value={formData.endereco} onChange={handleInputChange} />
+              </div>
+            </div>
+          </form>
+        </section>
+
+        {/* COLUNA DIREITA: RESUMO E CUPOM */}
         <aside className={styles.summarySection}>
-          <div className={styles.summaryCard}>
-            <h2>Resumo da Encomenda</h2>
+          <h3>Resumo do Pedido</h3>
+          
+          <div className={styles.itemsList}>
+            {cartItems.map((item, index) => (
+              <div key={index} className={styles.summaryItem}>
+                <span>{item.quantidade || 1}x {item.name}</span>
+                <span>R$ {(item.price * (item.quantidade || 1)).toFixed(2).replace('.', ',')}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* SESSÃO DE CUPOM */}
+          <div className={styles.couponSection}>
+            <label><Tag size={16} /> Cupom de Desconto</label>
             
-            <div className={styles.itemsList}>
-              {cartItems.map((item) => (
-                <div key={item.id} className={styles.summaryItem}>
-                  <div className={styles.itemInfo}>
-                    <span className={styles.itemQtd}>{item.quantity}x</span>
-                    <span className={styles.itemName}>{item.name}</span>
-                  </div>
-                  <span className={styles.itemPrice}>
-                    R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
-                  </span>
+            {!cupomAplicado ? (
+              <div className={styles.couponInputWrapper}>
+                <input 
+                  type="text" 
+                  placeholder="Digite seu código"
+                  value={cupomInput}
+                  onChange={(e) => setCupomInput(e.target.value.toUpperCase())}
+                  disabled={validandoCupom}
+                />
+                <button 
+                  type="button" 
+                  onClick={handleAplicarCupom}
+                  disabled={validandoCupom || !cupomInput}
+                  className={styles.applyBtn}
+                >
+                  {validandoCupom ? <Loader size={16} className={styles.spin} /> : 'Aplicar'}
+                </button>
+              </div>
+            ) : (
+              <div className={styles.activeCoupon}>
+                <div className={styles.couponTag}>
+                  <Check size={16} color="#38B2A6" />
+                  <span>{cupomAplicado.codigo} ({cupomAplicado.percentual}% OFF)</span>
                 </div>
-              ))}
+                <button type="button" onClick={handleRemoverCupom} className={styles.removeBtn}>
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className={styles.totals}>
+            <div className={styles.totalRow}>
+              <span>Subtotal</span>
+              <span>R$ {cartTotal.toFixed(2).replace('.', ',')}</span>
             </div>
-
-            <div className={styles.totalsList}>
-              <div className={styles.totalRow}>
-                <span>Subtotal</span>
-                <span>R$ {cartTotal.toFixed(2).replace('.', ',')}</span>
+            
+            {cupomAplicado && (
+              <div className={`${styles.totalRow} ${styles.discountRow}`}>
+                <span>Desconto</span>
+                <span>- R$ {valorDesconto.toFixed(2).replace('.', ',')}</span>
               </div>
-              <div className={styles.totalRow}>
-                <span>Entrega</span>
-                <span>R$ {taxaEntrega.toFixed(2).replace('.', ',')}</span>
-              </div>
-              <div className={`${styles.totalRow} ${styles.grandTotal}`}>
-                <span>Total a Pagar</span>
-                <span>R$ {totalFinal.toFixed(2).replace('.', ',')}</span>
-              </div>
-            </div>
+            )}
 
-            <button 
-              type="submit" 
-              className={styles.submitBtn} 
-              disabled={isProcessing}
-            >
-              {isProcessing ? 'A processar pagamento...' : 'Confirmar Pagamento'}
-            </button>
-
-            <div className={styles.secureNotice}>
-              <ShieldCheck size={16} />
-              <span>Ambiente 100% Seguro. Os seus dados estão protegidos.</span>
+            <div className={`${styles.totalRow} ${styles.grandTotal}`}>
+              <span>Total a Pagar</span>
+              <span>R$ {valorFinal.toFixed(2).replace('.', ',')}</span>
             </div>
           </div>
-        </aside>
 
-      </form>
+          <button 
+            type="submit" 
+            form="checkout-form" 
+            className={styles.submitBtn}
+            disabled={processandoCompra}
+          >
+            {processandoCompra ? 'Processando...' : 'Confirmar Pedido'}
+          </button>
+        </aside>
+      </div>
     </div>
   );
 };
