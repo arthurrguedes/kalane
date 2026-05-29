@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
         const userData = await apiFetch('/auth/me');
         setUser({
           id: userData.id,
+          nome: userData.nome,
           email: userData.email,
           isAdmin: userData.isAdmin || false
         });
@@ -69,6 +70,7 @@ const login = async (email, password) => {
       // Define o objeto do usuário incluindo o isAdmin
       setUser({
         id: userData.id,
+        nome: userData.nome,
         email: userData.email,
         isAdmin: userData.isAdmin || false // Se o backend esquecer, garante que é false
       });

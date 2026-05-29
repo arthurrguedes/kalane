@@ -1,245 +1,310 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import { apiFetch } from '../../services/api';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Trash2, Package } from 'lucide-react';
+import { User, Package, Heart, LogOut, MapPin, Phone, Lock, Mail, Camera, X, Shield } from 'lucide-react';
 import styles from './Perfil.module.css';
 
 const Perfil = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation(); 
-  
-  const [activeTab, setActiveTab] = useState(location.state?.tab || 'pedidos');
-  
-  const [favorites, setFavorites] = useState([]);
-  const [isLoadingFavs, setIsLoadingFavs] = useState(false);
+  const location = useLocation();
+  const { addToast } = useToast();
 
-  // Novos estados para gerir os pedidos
-  const [orders, setOrders] = useState([]);
-  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [activeTab, setActiveTab] = useState(location.state?.tab || 'dados');
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Estados de carregamento separados para cada formulário
+  const [isSavingDados, setIsSavingDados] = useState(false);
+  const [isSavingSeguranca, setIsSavingSeguranca] = useState(false);
+  
+  const [showCompleteProfileModal, setShowCompleteProfileModal] = useState(false);
 
-  // 1º useEffect: Atualiza a aba se o utilizador clicar no Header estando já na página de Perfil
+  // 1. Estado isolado para Dados Cadastrais e Endereço
+  const [formData, setFormData] = useState({
+    nome: '',
+    telefone: '',
+    cep: '',
+    endereco: '',
+  });
+
+  // 2. Estado isolado para Segurança (E-mail e Senha)
+  const [securityData, setSecurityData] = useState({
+    email: '',
+    senha: '', 
+  });
+
   useEffect(() => {
-    if (location.state?.tab) {
-      setActiveTab(location.state.tab);
+    if (!user) {
+      navigate('/login');
+      return;
     }
-  }, [location.state]);
 
-  // 2º useEffect: Busca Favoritos ou Pedidos dependendo da aba ativa
-  useEffect(() => {
-    const fetchData = async () => {
-      if (activeTab === 'favoritos') {
-        setIsLoadingFavs(true);
-        try {
-          const data = await apiFetch('/favoritos');
-          const flatFavorites = data.map(item => item.products);
-          setFavorites(flatFavorites);
-        } catch (error) {
-          console.error('Erro ao buscar favoritos:', error);
-        } finally {
-          setIsLoadingFavs(false);
+    const carregarPerfil = async () => {
+      try {
+        const data = await apiFetch('/perfil'); 
+
+        const nomeDoEmail = user?.email?.split('@')[0] || '';
+        
+        setFormData({
+          nome: data.nome || '',
+          telefone: data.telefone || '',
+          cep: data.cep || '',
+          endereco: data.endereco || '',
+        });
+
+        setSecurityData({
+          email: data.email || '',
+          senha: '', 
+        });
+
+        if (!data.telefone || !data.endereco) {
+          setShowCompleteProfileModal(true);
         }
-      } else if (activeTab === 'pedidos') {
-        setIsLoadingOrders(true);
-        try {
-          const data = await apiFetch('/pedidos'); // Rota que criámos no Passo 1
-          setOrders(data);
-        } catch (error) {
-          console.error('Erro ao buscar pedidos:', error);
-        } finally {
-          setIsLoadingOrders(false);
-        }
+      } catch (error) {
+        addToast('Erro ao carregar dados do perfil.', 'error');
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    if (user) {
-      fetchData();
-    }
-  }, [activeTab, user]);
+    carregarPerfil();
+  }, [user, navigate]);
 
-  const handleRemoveFavorite = async (productId) => {
+  // Handlers independentes
+  const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleSecurityChange = (e) => setSecurityData({ ...securityData, [e.target.name]: e.target.value });
+
+  // Salvar apenas Dados
+  const handleSalvarDados = async (e) => {
+    if (e) e.preventDefault();
+    setIsSavingDados(true);
+
     try {
-      await apiFetch('/favoritos/toggle', {
-        method: 'POST',
-        body: JSON.stringify({ product_id: productId }),
+      await apiFetch('/perfil', {
+        method: 'PUT',
+        body: JSON.stringify(formData), // Envia apenas os dados de endereço/contato
       });
-      setFavorites(prev => prev.filter(prod => prod.id !== productId));
+
+      addToast('Dados cadastrais atualizados com sucesso!', 'success');
+      setShowCompleteProfileModal(false); 
     } catch (error) {
-      console.error('Erro ao remover favorito:', error);
+      addToast(error.message || 'Erro ao atualizar o perfil.', 'error');
+    } finally {
+      setIsSavingDados(false);
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
+  // Salvar apenas Segurança
+  const handleSalvarSeguranca = async (e) => {
+    e.preventDefault();
+    setIsSavingSeguranca(true);
+
+    try {
+      const payload = { email: securityData.email };
+      if (securityData.senha) {
+        payload.senha = securityData.senha;
+      }
+
+      await apiFetch('/perfil', {
+        method: 'PUT',
+        body: JSON.stringify(payload), // Envia apenas e-mail e senha
+      });
+
+      addToast('Dados de acesso atualizados com sucesso!', 'success');
+      setSecurityData(prev => ({ ...prev, senha: '' })); // Limpa o campo de senha após sucesso
+    } catch (error) {
+      addToast(error.message || 'Erro ao atualizar segurança.', 'error');
+    } finally {
+      setIsSavingSeguranca(false);
+    }
   };
 
-  // Função auxiliar para formatar a data que vem do banco
-  const formatarData = (dataString) => {
-    const opcoes = { day: '2-digit', month: 'long', year: 'numeric' };
-    return new Date(dataString).toLocaleDateString('pt-BR', opcoes);
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
+
+  if (isLoading) return <div className={styles.loading}>Carregando perfil...</div>;
 
   return (
     <div className={styles.perfilContainer}>
-      <aside className={styles.sidebar}>
-        <div className={styles.userInfo}>
-          <div className={styles.avatar}>{user?.email?.charAt(0).toUpperCase() || 'U'}</div>
-          <h2>{user?.email?.split('@')[0] || 'Usuário'}</h2>
-          <p>{user?.email}</p>
+      
+      {/* MODAL DE COMPLETAR PERFIL */}
+      {showCompleteProfileModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <button className={styles.closeModalBtn} onClick={() => setShowCompleteProfileModal(false)}>
+              <X size={24} />
+            </button>
+            <div className={styles.modalHeader}>
+              <h2>Complete o seu Perfil</h2>
+              <p>Faltam alguns detalhes! Preencha os dados abaixo para agilizar suas futuras compras na Lachoe Beauty.</p>
+            </div>
+            <form onSubmit={handleSalvarDados} className={styles.modalForm}>
+              <div className={styles.inputGroup}>
+                <label><Phone size={16} /> WhatsApp / Telefone</label>
+                <input type="tel" name="telefone" required value={formData.telefone} onChange={handleInputChange} placeholder="(11) 99999-9999" />
+              </div>
+              <div className={styles.row}>
+                <div className={styles.inputGroup}>
+                  <label><MapPin size={16} /> CEP</label>
+                  <input type="text" name="cep" required value={formData.cep} onChange={handleInputChange} placeholder="00000-000" />
+                </div>
+                <div className={styles.inputGroup} style={{ flex: 2 }}>
+                  <label>Endereço Completo</label>
+                  <input type="text" name="endereco" required value={formData.endereco} onChange={handleInputChange} placeholder="Rua, Número, Bairro" />
+                </div>
+              </div>
+              <button type="submit" className={styles.btnPrimary} disabled={isSavingDados}>
+                {isSavingDados ? 'Salvando...' : 'Salvar e Continuar'}
+              </button>
+            </form>
+          </div>
         </div>
-        <nav className={styles.menu}>
-          <button 
-            className={activeTab === 'pedidos' ? styles.active : ''} 
-            onClick={() => setActiveTab('pedidos')}
-          >
-            Meus Pedidos
-          </button>
-          <button 
-            className={activeTab === 'favoritos' ? styles.active : ''} 
-            onClick={() => setActiveTab('favoritos')}
-          >
-            Meus Favoritos
-          </button>
-          <button 
-            className={activeTab === 'dados' ? styles.active : ''} 
-            onClick={() => setActiveTab('dados')}
-          >
-            Meus Dados
-          </button>
-          <button 
-            className={activeTab === 'enderecos' ? styles.active : ''} 
-            onClick={() => setActiveTab('enderecos')}
-          >
-            Endereços
-          </button>
-          <button onClick={handleLogout} className={styles.logoutBtn}>
-            Sair da Conta
-          </button>
-        </nav>
-      </aside>
+      )}
 
-      <main className={styles.content}>
+      <div className={styles.pageHeader}>
+        <h1>Minha Conta</h1>
+      </div>
+
+      <div className={styles.perfilGrid}>
         
-        {/* CONTEÚDO: MEUS PEDIDOS */}
-        {activeTab === 'pedidos' && (
-          <>
-            <h1 className={styles.title}>Meus Pedidos</h1>
-            
-            {isLoadingOrders ? (
-              <p style={{ marginTop: '20px' }}>Carregando seus pedidos...</p>
-            ) : orders.length === 0 ? (
-              <div className={styles.emptyState}>
-                <p>Você ainda não possui pedidos.</p>
-                <button className={styles.shopBtn} onClick={() => navigate('/produtos')}>
-                  Ir para a loja
-                </button>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '20px' }}>
-                {orders.map((pedido) => (
-                  <div key={pedido.id} style={{ border: '1px solid #e5e7eb', borderRadius: '0.75rem', padding: '1.5rem', backgroundColor: '#fff' }}>
-                    
-                    {/* Cabeçalho do Pedido */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f3f4f6', paddingBottom: '1rem', marginBottom: '1rem' }}>
-                      <div>
-                        <p style={{ margin: '0', fontSize: '0.85rem', color: '#6b7280' }}>Pedido #{pedido.id}</p>
-                        <p style={{ margin: '0.25rem 0 0 0', fontWeight: '500', color: '#1f2937' }}>{formatarData(pedido.created_at)}</p>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <span style={{ backgroundColor: '#d1fae5', color: '#047857', padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: '600' }}>
-                          {pedido.status}
-                        </span>
-                        <p style={{ margin: '0.5rem 0 0 0', fontWeight: 'bold', fontSize: '1.1rem', color: '#38B2A6' }}>
-                          R$ {pedido.total_amount.toFixed(2).replace('.', ',')}
-                        </p>
-                      </div>
-                    </div>
+        {/* MENU LATERAL */}
+        <aside className={styles.sidebar}>
+          <div className={styles.userInfo}>
+          <div className={styles.avatarPlaceholder}>
+            <Camera size={24} color="#aaa" />
+          </div>
+          {/* Mostra o nome do banco. Se não tiver por algum erro, mostra o email cortado */}
+          <h3>{formData.nome || securityData.email.split('@')[0]}</h3>
+          <p>{securityData.email}</p>
+        </div>
 
-                    {/* Lista de Itens do Pedido */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', fontWeight: '600', color: '#374151' }}>Itens da Encomenda:</p>
-                      {pedido.order_items.map((item, index) => (
-                        <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                          <div style={{ width: '40px', height: '40px', backgroundColor: '#f3f4f6', borderRadius: '0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Package size={20} color="#9ca3af" />
-                          </div>
-                          <div style={{ flex: 1 }}>
-                            <p style={{ margin: '0', fontSize: '0.9rem', color: '#1f2937' }}>{item.products.name}</p>
-                            <p style={{ margin: '0', fontSize: '0.8rem', color: '#6b7280' }}>Qtd: {item.quantity} un.</p>
-                          </div>
-                          <p style={{ margin: '0', fontSize: '0.9rem', fontWeight: '500' }}>
-                            R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+          <nav className={styles.sideNav}>
+            <button className={activeTab === 'dados' ? styles.active : ''} onClick={() => setActiveTab('dados')}>
+              <User size={18} /> Meus Dados
+            </button>
+            <button className={activeTab === 'seguranca' ? styles.active : ''} onClick={() => setActiveTab('seguranca')}>
+              <Shield size={18} /> Segurança
+            </button>
+            <button className={activeTab === 'pedidos' ? styles.active : ''} onClick={() => setActiveTab('pedidos')}>
+              <Package size={18} /> Meus Pedidos
+            </button>
+            <button className={activeTab === 'favoritos' ? styles.active : ''} onClick={() => setActiveTab('favoritos')}>
+              <Heart size={18} /> Meus Favoritos
+            </button>
+            <div className={styles.divider}></div>
+            <button className={styles.logoutBtn} onClick={handleLogout}>
+              <LogOut size={18} /> Sair da conta
+            </button>
+          </nav>
+        </aside>
 
+        {/* CONTEÚDO PRINCIPAL */}
+        <main className={styles.mainContent}>
+          
+          {/* ABA: MEUS DADOS */}
+          {activeTab === 'dados' && (
+            <section className={styles.tabSection}>
+              <h2>Informações Pessoais</h2>
+              <p className={styles.sectionDesc}>Atualize seus dados básicos e endereço de entrega.</p>
+
+              <form onSubmit={handleSalvarDados} className={styles.dadosForm}>
+                <div className={styles.formSection}>
+                  <h3>Dados Cadastrais</h3>
+                  <div className={styles.inputGrid}>
+                    <div className={styles.inputGroup}>
+                      <label>Telefone / WhatsApp</label>
+                      <input type="tel" name="telefone" value={formData.telefone} onChange={handleInputChange} />
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
+                </div>
 
-        {/* CONTEÚDO: MEUS FAVORITOS */}
-        {activeTab === 'favoritos' && (
-          <>
-            <h1 className={styles.title}>Meus Favoritos</h1>
-            
-            {isLoadingFavs ? (
-              <p style={{ marginTop: '20px' }}>Carregando seus favoritos...</p>
-            ) : favorites.length === 0 ? (
-              <div className={styles.emptyState}>
-                <p>Você ainda não favoritou nenhum produto.</p>
-                <button className={styles.shopBtn} onClick={() => navigate('/produtos')}>
-                  Explorar Produtos
-                </button>
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px', marginTop: '30px' }}>
-                {favorites.map((produto) => (
-                  <div key={produto.id} style={{ border: '1px solid #e5e7eb', padding: '15px', borderRadius: '8px', backgroundColor: '#fff' }}>
-                    
-                    <div style={{ height: '150px', backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '15px', borderRadius: '4px' }}>
-                      <span style={{ color: '#6b7280', fontSize: '12px' }}>{produto.category}</span>
+                <div className={styles.formSection}>
+                  <h3>Endereço de Entrega Padrão</h3>
+                  <div className={styles.inputGrid}>
+                    <div className={styles.inputGroup}>
+                      <label>CEP</label>
+                      <input type="text" name="cep" value={formData.cep} onChange={handleInputChange} />
                     </div>
-
-                    <Link to={`/produtos/${produto.id}`} style={{ textDecoration: 'none', color: '#111' }}>
-                      <h3 style={{ fontSize: '16px', margin: '0 0 5px 0', fontWeight: '500' }}>{produto.name}</h3>
-                      <p style={{ fontWeight: 'bold', margin: '0' }}>R$ {produto.price.toFixed(2).replace('.', ',')}</p>
-                    </Link>
-                    
-                    <button 
-                      onClick={() => handleRemoveFavorite(produto.id)}
-                      style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', marginTop: '15px', display: 'flex', alignItems: 'center', gap: '5px', padding: '0', fontSize: '14px' }}
-                    >
-                      <Trash2 size={16} /> Remover
-                    </button>
+                    <div className={styles.inputGroup} style={{ gridColumn: 'span 2' }}>
+                      <label>Endereço Completo</label>
+                      <input type="text" name="endereco" value={formData.endereco} onChange={handleInputChange} />
+                    </div>
                   </div>
-                ))}
+                </div>
+
+                <div className={styles.formActions}>
+                  <button type="submit" className={styles.btnPrimary} disabled={isSavingDados}>
+                    {isSavingDados ? 'Salvando...' : 'Salvar Informações'}
+                  </button>
+                </div>
+              </form>
+            </section>
+          )}
+
+          {/* ABA: SEGURANÇA */}
+          {activeTab === 'seguranca' && (
+            <section className={styles.tabSection}>
+              <h2>Segurança e Acesso</h2>
+              <p className={styles.sectionDesc}>Gerencie o e-mail que você usa para acessar a plataforma e atualize sua senha.</p>
+
+              <form onSubmit={handleSalvarSeguranca} className={styles.dadosForm}>
+                <div className={styles.formSection}>
+                  <div className={styles.inputGrid}>
+                    <div className={styles.inputGroup} style={{ gridColumn: 'span 2' }}>
+                      <label><Mail size={14} /> E-mail de Acesso</label>
+                      <input type="email" name="email" value={securityData.email} onChange={handleSecurityChange} required />
+                    </div>
+                    <div className={styles.inputGroup} style={{ gridColumn: 'span 2' }}>
+                      <label><Lock size={14} /> Nova Senha</label>
+                      <input 
+                        type="password" 
+                        name="senha" 
+                        value={securityData.senha} 
+                        onChange={handleSecurityChange} 
+                        placeholder="Deixe em branco para manter a atual" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.formActions}>
+                  <button type="submit" className={styles.btnPrimary} disabled={isSavingSeguranca}>
+                    {isSavingSeguranca ? 'Salvando...' : 'Atualizar Acesso'}
+                  </button>
+                </div>
+              </form>
+            </section>
+          )}
+
+          {/* ABA: MEUS PEDIDOS */}
+          {activeTab === 'pedidos' && (
+            <section className={styles.tabSection}>
+              <h2>Meus Pedidos</h2>
+              <div className={styles.emptyState}>
+                <Package size={48} color="#ccc" />
+                <p>Você ainda não fez nenhum pedido.</p>
+                <button onClick={() => navigate('/produtos')} className={styles.btnSecondary}>Explorar Produtos</button>
               </div>
-            )}
-          </>
-        )}
+            </section>
+          )}
 
-        {/* CONTEÚDO: OUTRAS ABAS */}
-        {activeTab === 'dados' && (
-          <>
-            <h1 className={styles.title}>Meus Dados</h1>
-            <p style={{ marginTop: '20px' }}>Esta seção será desenvolvida em breve.</p>
-          </>
-        )}
+          {/* ABA: MEUS FAVORITOS */}
+          {activeTab === 'favoritos' && (
+            <section className={styles.tabSection}>
+              <h2>Meus Favoritos</h2>
+              <div className={styles.emptyState}>
+                <Heart size={48} color="#ccc" />
+                <p>Você ainda não tem produtos favoritos.</p>
+              </div>
+            </section>
+          )}
 
-        {activeTab === 'enderecos' && (
-          <>
-            <h1 className={styles.title}>Endereços</h1>
-            <p style={{ marginTop: '20px' }}>Esta seção será desenvolvida em breve.</p>
-          </>
-        )}
-
-      </main>
+        </main>
+      </div>
     </div>
   );
 };

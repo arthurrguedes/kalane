@@ -26,7 +26,10 @@ const Header = () => {
 
   console.log("Usuário no Header:", user);
 
+  const primeiroNome = user?.nome ? user.nome.split(' ')[0] : user?.email?.split('@')[0];
+
   return (
+        <>
     <header className={styles.header}>
       {/* LOGO */}
       <div className={styles.logoArea}>
@@ -68,8 +71,8 @@ const Header = () => {
               {user ? (
                 <>
                   <div className={styles.userInfoDropdown}>
-                    <span className={styles.greeting}>Olá,</span>
-                    <span className={styles.userName}>{user.email.split('@')[0]}</span>
+                  <span className={styles.greeting}>Olá,</span>
+                  <span className={styles.userName}>{primeiroNome}</span>
                   </div>
                   <div className={styles.dropdownDivider}></div>
                   
@@ -134,6 +137,11 @@ const Header = () => {
         </nav>
       )}
     </header>
+
+    <div className={styles.promoBar}>
+        USE O CUPOM <b>BEMVINDO10</b> PARA GANHAR 10% NA PRIMEIRA COMPRA
+      </div>
+      </>
   );
 };
 

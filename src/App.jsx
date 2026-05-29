@@ -46,7 +46,7 @@ const App = () => {
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
             <Route path="/esqueci-minha-senha" element={<EsqueciSenha />} />
-            <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="/admin/estoque" element={<ProtectedAdminRoute><AdminEstoque /></ProtectedAdminRoute>} />
           </Routes>
         </main>

@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useToast } from './ToastContext';
-import { useAuth } from './AuthContext'; // Importante para saber o usuário logado
+import { useAuth } from './AuthContext';
 import { apiFetch } from '../services/api';
 
 const CartContext = createContext();
@@ -12,123 +12,126 @@ export const CartProvider = ({ children }) => {
   const { addToast } = useToast();
   const { user } = useAuth();
 
-  // Variáveis calculadas
-  const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-  const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
-
-  // Controle Visual do Carrinho
-  const toggleCart = () => setIsCartOpen(!isCartOpen);
-  const openCart = () => setIsCartOpen(true);
-  const closeCart = () => setIsCartOpen(false);
-
-  // 1. Buscar carrinho do banco de dados
-  const fetchCart = async () => {
-    try {
-      const data = await apiFetch('/carrinho');
-      const itensFormatados = data.map((item) => ({
-        id: item.products.id,
-        name: item.products.name,
-        price: item.products.price,
-        image_url: item.products.image_url,
-        quantity: item.quantity,
-      }));
-      setCartItems(itensFormatados);
-    } catch (error) {
-      console.error('Erro ao buscar carrinho:', error);
-    }
-  };
-
-  // Carrega os itens automaticamente quando o usuário loga
   useEffect(() => {
     if (user) {
-      fetchCart();
+      const carregarBanco = async () => {
+        try {
+          const data = await apiFetch('/cart'); // ou '/carrinho' dependendo do seu backend
+          setCartItems(Array.isArray(data) ? data : []);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      carregarBanco();
     } else {
-      setCartItems([]);
+      const carrinhoSalvo = localStorage.getItem('@Kalane:cart');
+      if (carrinhoSalvo) setCartItems(JSON.parse(carrinhoSalvo));
     }
   }, [user]);
 
-  // 2. Adicionar produto ao carrinho (salvando no banco)
-  const addToCart = async (product, quantity = 1) => {
+  useEffect(() => {
     if (!user) {
-      addToast('Faça login para adicionar produtos.', 'error');
-      return;
+      localStorage.setItem('@Kalane:cart', JSON.stringify(cartItems));
+    }
+  }, [cartItems, user]);
+
+  const addToCart = async (produto, quantidade) => {
+    // 1ª TRAVA: Verifica se a soma do que já tem no carrinho + o que está sendo adicionado passa do estoque
+    const itemExistente = cartItems.find((item) => item.id === produto.id);
+    const qtdAtual = itemExistente ? (itemExistente.quantidade || itemExistente.quantity || 0) : 0;
+
+    if (produto.estoque !== undefined && (qtdAtual + quantidade > produto.estoque)) {
+      addToast(`Estoque insuficiente! Você já tem ${qtdAtual} no carrinho e o limite é ${produto.estoque}.`, 'warning');
+      return; // Interrompe a função aqui, não deixa adicionar
     }
 
-    const itemExistente = cartItems.find((item) => item.id === product.id);
-    const novaQuantidade = itemExistente ? itemExistente.quantity + quantity : quantity;
-
     try {
-      // Salva no backend
-      await apiFetch('/carrinho', {
-        method: 'POST',
-        body: JSON.stringify({ product_id: product.id, quantity: novaQuantidade }),
-      });
-      
-      // Atualiza a lista na tela e abre a barra lateral
-      await fetchCart();
-      addToast(`${product.name} adicionado ao carrinho!`, 'success');
-      openCart(); 
+      if (user) {
+        await apiFetch('/cart', {
+          method: 'POST',
+          body: JSON.stringify({ product_id: produto.id, quantity: qtdAtual + quantidade }),
+        });
+        const data = await apiFetch('/cart');
+        setCartItems(Array.isArray(data) ? data : []);
+      } else {
+        setCartItems((prev) => {
+          if (itemExistente) {
+            return prev.map((item) =>
+              item.id === produto.id ? { ...item, quantidade: item.quantidade + quantidade } : item
+            );
+          }
+          // Salvamos todo o objeto do produto (incluindo o estoque) no carrinho local
+          return [...prev, { ...produto, quantidade }];
+        });
+      }
+      addToast(`${produto.name} adicionado ao carrinho!`, 'success');
+      setIsCartOpen(true);
     } catch (error) {
-      console.error(error);
       addToast('Erro ao adicionar produto.', 'error');
     }
   };
 
-  // 3. Remover produto do carrinho
-  const removeFromCart = async (productId) => {
+  const removeFromCart = async (produtoId) => {
     try {
-      await apiFetch(`/carrinho/${productId}`, {
-        method: 'DELETE',
-      });
-      // Remove da tela imediatamente
-      setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
+      if (user) {
+        await apiFetch(`/cart/${produtoId}`, { method: 'DELETE' });
+      }
+      setCartItems((prev) => prev.filter((item) => item.id !== produtoId));
+      addToast('Produto removido.', 'info');
     } catch (error) {
       addToast('Erro ao remover produto.', 'error');
     }
   };
 
-  // 4. Atualizar quantidade (Botões de + e - dentro do SideCart)
-  const updateQuantity = async (productId, newQuantity) => {
-    if (newQuantity < 1) return;
+  const updateQuantity = async (produtoId, quantidade) => {
+    if (quantidade <= 0) return removeFromCart(produtoId);
 
-    // Atualiza a tela primeiro para o usuário não sentir lentidão (Optimistic UI)
-    setCartItems(prevItems => 
-      prevItems.map(item => 
-        item.id === productId ? { ...item, quantity: newQuantity } : item
-      )
-    );
+    // 2ª TRAVA: Bloqueia alterações feitas pelos botões de + e -
+    const item = cartItems.find((i) => i.id === produtoId);
+    if (item && item.estoque !== undefined && quantidade > item.estoque) {
+      addToast(`Limite atingido! Temos apenas ${item.estoque} unidades disponíveis.`, 'warning');
+      return;
+    }
 
     try {
-      // Salva a nova quantidade no banco
-      await apiFetch('/carrinho', {
-        method: 'POST',
-        body: JSON.stringify({ product_id: productId, quantity: newQuantity }),
-      });
+      if (user) {
+        await apiFetch(`/cart/${produtoId}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ quantity: quantidade }),
+        });
+      }
+      
+      setCartItems((prev) =>
+        prev.map((i) => (i.id === produtoId ? { ...i, quantidade } : i))
+      );
     } catch (error) {
-      // Se a API falhar, busca os dados reais de volta
-      fetchCart();
-      addToast('Erro ao alterar quantidade.', 'error');
+      addToast('Erro ao atualizar quantidade.', 'error');
     }
   };
 
-  const clearCart = () => {
+  const clearCart = async () => {
+    if (user) {
+      try {
+        await apiFetch('/cart/clear', { method: 'DELETE' });
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      localStorage.removeItem('@Kalane:cart');
+    }
     setCartItems([]);
   };
 
+  const cartTotal = cartItems.reduce((acc, item) => acc + (item.price || 0) * (item.quantidade || item.quantity || 1), 0);
+  const cartCount = cartItems.reduce((acc, item) => acc + (item.quantidade || item.quantity || 1), 0);
+
+  const openCart = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
+
   return (
-    <CartContext.Provider value={{ 
-      cartItems, 
-      cartTotal, 
-      cartCount,
-      isCartOpen, 
-      addToCart, 
-      removeFromCart, 
-      updateQuantity, 
-      clearCart,
-      toggleCart,
-      openCart,
-      closeCart
-    }}>
+    <CartContext.Provider
+      value={{ cartItems, isCartOpen, openCart, closeCart, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartCount, toggleCart: () => setIsCartOpen(!isCartOpen) }}
+    >
       {children}
     </CartContext.Provider>
   );

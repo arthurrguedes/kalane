@@ -1,26 +1,38 @@
 import React from 'react';
 import { X, Minus, Plus, Trash2 } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
+import { useToast } from '../../contexts/ToastContext'; // Importando o Toast
 import { useNavigate } from 'react-router-dom';
 import styles from './SideCart.module.css';
 
 const SideCart = () => {
   const { isCartOpen, closeCart, cartItems, cartTotal, updateQuantity, removeFromCart } = useCart();
+  const { addToast } = useToast();
   const navigate = useNavigate();
 
   if (!isCartOpen) return null;
 
   const handleCheckout = () => {
     closeCart();
-    navigate('/checkout'); // Rota que criaremos no futuro
+    navigate('/checkout'); 
+  };
+
+  const handleIncrease = (item) => {
+    const currentQty = item.quantidade || item.quantity || 1;
+    
+    // Feedback visual direto se o limite de estoque foi alcançado
+    if (item.estoque !== undefined && currentQty >= item.estoque) {
+      addToast(`Limite atingido! Só temos ${item.estoque} unidades disponíveis.`, 'warning');
+      return;
+    }
+    
+    updateQuantity(item.id, currentQty + 1);
   };
 
   return (
     <>
-      {/* Fundo escuro que fecha o carrinho ao clicar fora */}
       <div className={styles.overlay} onClick={closeCart} />
       
-      {/* Janela do Carrinho */}
       <div className={`${styles.cartContainer} ${isCartOpen ? styles.open : ''}`}>
         <div className={styles.header}>
           <h2>O seu carrinho</h2>
@@ -36,33 +48,51 @@ const SideCart = () => {
               <button onClick={closeCart} className={styles.continueBtn}>Continuar a comprar</button>
             </div>
           ) : (
-            cartItems.map((item) => (
-              <div key={item.id} className={styles.cartItem}>
-                <div className={styles.itemImage}>
-                  {/* Substituir pela imagem real do produto */}
-                  <span>Img</span>
-                </div>
-                
-                <div className={styles.itemDetails}>
-                  <h4>{item.name}</h4>
-                  <p className={styles.price}>R$ {item.price.toFixed(2).replace('.', ',')}</p>
-                  
-                  <div className={styles.quantityControl}>
-                    <button onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label="Diminuir">
-                      <Minus size={14} />
-                    </button>
-                    <span>{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label="Aumentar">
-                      <Plus size={14} />
-                    </button>
-                  </div>
-                </div>
+            cartItems.map((item) => {
+              const qtdAtual = item.quantidade || item.quantity || 1;
+              const isMaxStock = item.estoque !== undefined && qtdAtual >= item.estoque;
 
-                <button onClick={() => removeFromCart(item.id)} className={styles.removeBtn} aria-label="Remover item">
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            ))
+              return (
+                <div key={item.id} className={styles.cartItem}>
+                  <div className={styles.itemImage}>
+                    <img 
+                      src={item.image_url || "https://via.placeholder.com/60"} 
+                      alt={item.name} 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }}
+                    />
+                  </div>
+                  
+                  <div className={styles.itemDetails}>
+                    <h4>{item.name}</h4>
+                    <p className={styles.price}>R$ {(item.price || 0).toFixed(2).replace('.', ',')}</p>
+                    
+                    <div className={styles.quantityControl}>
+                      <button 
+                        onClick={() => updateQuantity(item.id, qtdAtual - 1)} 
+                        aria-label="Diminuir"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      
+                      <span>{qtdAtual}</span>
+                      
+                      <button 
+                        onClick={() => handleIncrease(item)} 
+                        aria-label="Aumentar"
+                        disabled={isMaxStock}
+                        style={{ cursor: isMaxStock ? 'not-allowed' : 'pointer', opacity: isMaxStock ? 0.3 : 1 }}
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <button onClick={() => removeFromCart(item.id)} className={styles.removeBtn} aria-label="Remover item">
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              )
+            })
           )}
         </div>
 
