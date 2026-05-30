@@ -19,6 +19,27 @@ const Perfil = () => {
   const [orders, setOrders] = useState([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
 
+  const [profileData, setProfileData] = useState({
+  nome: '',
+  email: '',
+  telefone: '',
+  cep: '',
+  endereco: ''
+  });
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(''); 
+
+  const [securityData, setSecurityData] = useState({
+  senhaAtual: '',
+  novaSenha: '',
+  confirmarSenha: ''
+});
+
+  const [securityMessage, setSecurityMessage] = useState('');
+  const [securityError, setSecurityError] = useState('');
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);  
+
   // 1º useEffect: Atualiza a aba se o utilizador clicar no Header estando já na página de Perfil
   useEffect(() => {
     if (location.state?.tab) {
@@ -58,6 +79,29 @@ const Perfil = () => {
     }
   }, [activeTab, user]);
 
+  useEffect(() => {
+  const fetchProfile = async () => {
+    try {
+      const data = await apiFetch('/perfil');
+
+      setProfileData({
+        nome: data.nome || '',
+        email: data.email || '',
+        telefone: data.telefone || '',
+        cep: data.cep || '',
+        endereco: data.endereco || ''
+      });
+
+    } catch (error) {
+      console.error('Erro ao carregar perfil:', error);
+    }
+  };
+
+  if (user && activeTab === 'dados') {
+    fetchProfile();
+  }
+}, [user, activeTab]);
+
   const handleRemoveFavorite = async (productId) => {
     try {
       await apiFetch('/favoritos/toggle', {
@@ -81,14 +125,81 @@ const Perfil = () => {
     return new Date(dataString).toLocaleDateString('pt-BR', opcoes);
   };
 
+  const handleSaveProfile = async (e) => {
+  e.preventDefault();
+
+  setIsSaving(true);
+  setSuccessMessage('');
+
+  try {
+    await apiFetch('/perfil', {
+      method: 'PUT',
+      body: JSON.stringify(profileData)
+    });
+
+    setSuccessMessage('Dados atualizados com sucesso!');
+
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setIsSaving(false);
+  }
+};
+
+const handleUpdatePassword = async (e) => {
+  e.preventDefault();
+
+  setSecurityError('');
+  setSecurityMessage('');
+
+  if (securityData.novaSenha.length < 6) {
+    setSecurityError('A nova senha deve ter pelo menos 6 caracteres.');
+    return;
+  }
+
+  if (securityData.novaSenha !== securityData.confirmarSenha) {
+    setSecurityError('As senhas não coincidem.');
+    return;
+  }
+
+  try {
+    setIsUpdatingPassword(true);
+
+    await apiFetch('/perfil', {
+      method: 'PUT',
+      body: JSON.stringify({
+        senha: securityData.novaSenha
+      })
+    });
+
+    setSecurityMessage('Senha alterada com sucesso!');
+
+    setSecurityData({
+      senhaAtual: '',
+      novaSenha: '',
+      confirmarSenha: ''
+    });
+
+  } catch (error) {
+    setSecurityError('Erro ao alterar senha.');
+  } finally {
+    setIsUpdatingPassword(false);
+  }
+};
+
   return (
     <div className={styles.perfilContainer}>
       <aside className={styles.sidebar}>
         <div className={styles.userInfo}>
-          <div className={styles.avatar}>{user?.email?.charAt(0).toUpperCase() || 'U'}</div>
-          <h2>{user?.email?.split('@')[0] || 'Usuário'}</h2>
-          <p>{user?.email}</p>
+        {/* Avatar usando a primeira letra do nome cadastrado */}
+        <div className={styles.avatar}>
+          {user?.nome ? user.nome.charAt(0).toUpperCase() : (user?.email?.charAt(0).toUpperCase() || 'U')}
         </div>
+        {/* Nome completo cadastrado */}
+        <h2>{user?.nome || 'Usuário'}</h2>
+        {/* E-mail para referência */}
+        <p>{user?.email}</p>
+      </div>
         <nav className={styles.menu}>
           <button 
             className={activeTab === 'pedidos' ? styles.active : ''} 
@@ -109,10 +220,10 @@ const Perfil = () => {
             Meus Dados
           </button>
           <button 
-            className={activeTab === 'enderecos' ? styles.active : ''} 
-            onClick={() => setActiveTab('enderecos')}
+            className={activeTab === 'seguranca' ? styles.active : ''} 
+            onClick={() => setActiveTab('seguranca')}
           >
-            Endereços
+            Segurança
           </button>
           <button onClick={handleLogout} className={styles.logoutBtn}>
             Sair da Conta
@@ -226,18 +337,160 @@ const Perfil = () => {
 
         {/* CONTEÚDO: OUTRAS ABAS */}
         {activeTab === 'dados' && (
-          <>
-            <h1 className={styles.title}>Meus Dados</h1>
-            <p style={{ marginTop: '20px' }}>Esta seção será desenvolvida em breve.</p>
-          </>
+  <>
+  <h1 className={styles.title}>Alterar Dados</h1>
+    <div className={styles.formCard}>
+  <form onSubmit={handleSaveProfile} className={styles.profileForm}>
+
+    <div className={styles.formGroup}>
+      <label className={styles.formLabel}>E-mail</label>
+      <input
+        type="email"
+        className={styles.formInput}
+        placeholder="seu@email.com"
+        value={profileData.email}
+        onChange={(e) =>
+          setProfileData({ ...profileData, email: e.target.value })
+        }
+      />
+    </div>
+
+    <div className={styles.formGroup}>
+      <label className={styles.formLabel}>Telefone</label>
+      <input
+        type="text"
+        className={styles.formInput}
+        placeholder="(21) 99999-9999"
+        value={profileData.telefone}
+        onChange={(e) =>
+          setProfileData({ ...profileData, telefone: e.target.value })
+        }
+      />
+    </div>
+
+    <div className={styles.formGroup}>
+      <label className={styles.formLabel}>CEP</label>
+      <input
+        type="text"
+        className={styles.formInput}
+        placeholder="00000-000"
+        value={profileData.cep}
+        onChange={(e) =>
+          setProfileData({ ...profileData, cep: e.target.value })
+        }
+      />
+    </div>
+
+    <div className={styles.formGroup}>
+      <label className={styles.formLabel}>Endereço</label>
+      <input
+        type="text"
+        className={styles.formInput}
+        placeholder="Rua, número e complemento"
+        value={profileData.endereco}
+        onChange={(e) =>
+          setProfileData({ ...profileData, endereco: e.target.value })
+        }
+      />
+    </div>
+
+    <button
+      type="submit"
+      disabled={isSaving}
+      className={styles.saveButton}
+    >
+      {isSaving ? 'Salvando...' : 'Salvar Dados'}
+    </button>
+
+    {successMessage && (
+      <p className={styles.successMessage}>
+        {successMessage}
+      </p>
+    )}
+
+  </form>
+</div>
+  </>
+)}
+
+        {activeTab === 'seguranca' && (
+  <>
+    <h1 className={styles.title}>Segurança</h1>
+
+    <div className={styles.formCard}>
+      <form
+        onSubmit={handleUpdatePassword}
+        className={styles.profileForm}
+      >
+
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel}>
+            Nova senha
+          </label>
+
+          <input
+            type="password"
+            className={styles.formInput}
+            placeholder="Digite sua nova senha"
+            value={securityData.novaSenha}
+            onChange={(e) =>
+              setSecurityData({
+                ...securityData,
+                novaSenha: e.target.value
+              })
+            }
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel}>
+            Confirmar nova senha
+          </label>
+
+          <input
+            type="password"
+            className={styles.formInput}
+            placeholder="Confirme sua nova senha"
+            value={securityData.confirmarSenha}
+            onChange={(e) =>
+              setSecurityData({
+                ...securityData,
+                confirmarSenha: e.target.value
+              })
+            }
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={isUpdatingPassword}
+          className={styles.saveButton}
+        >
+          {isUpdatingPassword
+            ? 'Atualizando...'
+            : 'Alterar Senha'}
+        </button>
+
+        {securityMessage && (
+          <p className={styles.successMessage}>
+            {securityMessage}
+          </p>
         )}
 
-        {activeTab === 'enderecos' && (
-          <>
-            <h1 className={styles.title}>Endereços</h1>
-            <p style={{ marginTop: '20px' }}>Esta seção será desenvolvida em breve.</p>
-          </>
+        {securityError && (
+          <p style={{
+            color: '#dc2626',
+            fontWeight: '600',
+            fontSize: '0.92rem'
+          }}>
+            {securityError}
+          </p>
         )}
+
+      </form>
+    </div>
+  </>
+)}
 
       </main>
     </div>

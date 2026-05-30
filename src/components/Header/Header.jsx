@@ -139,7 +139,7 @@ const Header = () => {
     </header>
 
     <div className={styles.promoBar}>
-        USE O CUPOM <b>BEMVINDO10</b> PARA GANHAR 10% NA PRIMEIRA COMPRA
+        <span>USE O CUPOM <b>BEMVINDO10</b> PARA GANHAR 10% NA PRIMEIRA COMPRA</span>
       </div>
       </>
   );

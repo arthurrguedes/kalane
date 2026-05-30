@@ -147,6 +147,107 @@
   background-color: #134540;
 }
 
+.profileForm {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  width: 100%;
+  max-width: 520px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.formLabel {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.formInput {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.8rem;
+  font-size: 0.95rem;
+  background-color: #ffffff;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: #38B2A6;
+  box-shadow: 0 0 0 4px rgba(56, 178, 166, 0.12);
+}
+
+.formInput::placeholder {
+  color: #9ca3af;
+}
+
+.saveButton {
+  margin-top: 0.5rem;
+  background: linear-gradient(135deg, #38B2A6, #2c9d92);
+  color: white;
+  border: none;
+  border-radius: 0.9rem;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.saveButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(56, 178, 166, 0.18);
+}
+
+.saveButton:active {
+  transform: scale(0.99);
+}
+
+.saveButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.successMessage {
+  color: #16a34a;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.formCard {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  .formCard {
+    padding: 1.25rem;
+  }
+
+  .profileForm {
+    max-width: 100%;
+  }
+
+  .saveButton {
+    width: 100%;
+  }
+}
+
 /* RESPONSIVIDADE */
 @media (max-width: 900px) {
   .perfilContainer {
