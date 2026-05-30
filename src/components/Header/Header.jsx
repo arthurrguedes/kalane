@@ -28,6 +28,17 @@ const Header = () => {
 
   const primeiroNome = user?.nome ? user.nome.split(' ')[0] : user?.email?.split('@')[0];
 
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearch = (e) => {
+  if (e.key === 'Enter' && searchTerm.trim()) {
+    // Redireciona para a página de produtos passando o termo na URL
+    navigate(`/produtos?search=${encodeURIComponent(searchTerm)}`);
+    setSearchTerm(''); // Limpa o input
+    setIsMobileMenuOpen(false);
+  }
+};
+
   return (
         <>
     <header className={styles.header}>
@@ -56,7 +67,14 @@ const Header = () => {
       {/* ÍCONES E BUSCA */}
       <div className={styles.headerActions}>
         <div className={styles.searchBox}>
-          <input type="text" placeholder="Buscar por produtos..." className={styles.searchInput} />
+          <input 
+            type="text" 
+            placeholder="Buscar por produtos..." 
+            className={styles.searchInput} 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleSearch}
+          />
           <Search size={16} className={styles.searchIcon} />
         </div>
         

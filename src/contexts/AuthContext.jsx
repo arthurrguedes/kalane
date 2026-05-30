@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
           id: userData.id,
           nome: userData.nome,
           email: userData.email,
-          isAdmin: userData.isAdmin || false
+          isAdmin: userData.is_admin || false
         });
       } catch (error) {
         setUser(null);
@@ -72,7 +72,7 @@ const login = async (email, password) => {
         id: userData.id,
         nome: userData.nome,
         email: userData.email,
-        isAdmin: userData.isAdmin || false // Se o backend esquecer, garante que é false
+        isAdmin: userData.is_admin || false // Se o backend esquecer, garante que é false
       });
       
     } catch (error) {
